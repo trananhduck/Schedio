@@ -393,6 +393,29 @@ header {
 .client-item h6 { transition: color 0.3s; }
 .client-item:hover h6 { color: var(--schedio-blue-primary) !important; }
 
+/* CSS riêng cho phần Channels */
+.channel-logo-wrapper {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.channel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 4px solid #fff;
+}
+
+.channel-link:hover .channel-logo-wrapper {
+    transform: scale(1.1);
+}
+
+.channel-link:hover h5 {
+    color: var(--schedio-blue-primary);
+}
+
 /* =========================================
    7. TRANG CONTACT
    ========================================= */

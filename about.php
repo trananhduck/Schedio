@@ -5,8 +5,8 @@ include 'templates/header.php';
 <div class="container my-5">
     <div class="row justify-content-center text-center mb-5">
         <div class="col-lg-10">
-            <h1 class="display-4 fw-bold text-dark-blue mb-3">Schedio – Công cụ đặt lịch truyền thông nhạc Rap/Hiphop
-            </h1>
+            <h1 class="display-4 fw-bold text-dark-blue mb-3">Schedio – Bệ phóng truyền thông cho nghệ sĩ Underground &
+                Indie</h1>
             <p class="lead text-muted">
                 Chúng tôi không chỉ là một công cụ đặt lịch. Schedio là cầu nối đưa âm nhạc của bạn chạm đến hàng triệu
                 khán giả trẻ thông qua hệ sinh thái truyền thông mạnh mẽ nhất hiện nay.
@@ -23,9 +23,9 @@ include 'templates/header.php';
     </div>
 
     <div class="row justify-content-center g-5 mb-5">
-        <div class="col-lg-5">
+        <div class="col-lg-8 text-center">
             <h3 class="fw-bold text-dark-blue mb-3">Sứ mệnh của chúng tôi</h3>
-            <p class="text-justify">
+            <p>
                 Xuất phát điểm từ những người yêu Rap/Hip-hop, chúng tôi hiểu rằng một sản phẩm âm nhạc chất lượng cần
                 một chiến lược lan tỏa xứng tầm.
                 Schedio ra đời để giải quyết bài toán khó khăn nhất của nghệ sĩ độc lập: <strong>Làm sao để được lắng
@@ -37,21 +37,61 @@ include 'templates/header.php';
                 phẩm.
             </p>
         </div>
+    </div>
 
-        <div class="col-lg-5">
-            <h3 class="fw-bold text-dark-blue mb-3">Hệ sinh thái truyền thông</h3>
-            <p>Schedio sở hữu và vận hành độc quyền các kênh truyền thông hàng đầu trong cộng đồng Rap Việt:</p>
-            <ul class="list-unstyled about-list">
-                <li><i class="bi bi-facebook text-primary me-2"></i> <strong>Page Grab Fan Tháng 9:</strong> Cộng đồng
-                    fan Rap sôi động nhất.</li>
-                <li><i class="bi bi-search text-primary me-2"></i> <strong>Page Rap Fan Thám Thính:</strong> Nơi cập
-                    nhật tin tức Underground nhanh nhất.</li>
-                <li><i class="bi bi-people-fill text-primary me-2"></i> <strong>Group Cộng đồng Grab Việt:</strong> Sân
-                    chơi thảo luận chuyên sâu.</li>
-                <li><i class="bi bi-tiktok text-dark me-2"></i> <strong>TikTok Channel:</strong> Đẩy trend và viral
-                    video ngắn.</li>
-            </ul>
+    <hr class="my-5 text-muted opacity-25">
+
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-dark-blue">Hệ sinh thái truyền thông</h2>
+        <p class="text-muted">Các kênh thông tin hàng đầu trong cộng đồng Rap Việt</p>
+    </div>
+
+    <div class="row g-4 justify-content-center mb-5">
+
+        <div class="col-md-4 text-center">
+            <a href="https://www.facebook.com/grabfanthang9" target="_blank"
+                class="text-decoration-none text-dark channel-link">
+                <div class="channel-logo-wrapper mb-3 mx-auto">
+                    <img src="./assets/images/gft9.png" alt="Page Grab Fan" class="rounded-circle shadow channel-img">
+                </div>
+                <h5 class="fw-bold">Page Grab Fan Tháng 9</h5>
+                <p class="text-muted small px-3">
+                    Kênh thông tin sôi động nhất với hơn 60K followers. Nơi cập nhật tin tức, meme và các sản phẩm mới
+                    nhất.
+                </p>
+            </a>
         </div>
+
+        <div class="col-md-4 text-center">
+            <a href="https://www.facebook.com/rapfanthamthinh" target="_blank"
+                class="text-decoration-none text-dark channel-link">
+                <div class="channel-logo-wrapper mb-3 mx-auto">
+                    <img src="./assets/images/rftt.png" alt="Rap Fan Tham Thinh"
+                        class="rounded-circle shadow channel-img">
+                </div>
+                <h5 class="fw-bold">Page Rap Fan Thám Thính</h5>
+                <p class="text-muted small px-3">
+                    Chuyên trang tin tức Underground nhanh và chính xác. Nơi các Rapper trẻ được phát
+                    hiện và tỏa sáng.
+                </p>
+            </a>
+        </div>
+
+        <div class="col-md-4 text-center">
+            <a href="https://www.facebook.com/groups/8276007849195211" target="_blank"
+                class="text-decoration-none text-dark channel-link">
+                <div class="channel-logo-wrapper mb-3 mx-auto">
+                    <img src="./assets/images/congdonggrabviet.png" alt="Group Cong Dong Grab Viet Undergorund"
+                        class="rounded-circle shadow channel-img bg-white p-3">
+                </div>
+                <h5 class="fw-bold">Group Cộng đồng Grab Việt Underground</h5>
+                <p class="text-muted small px-3">
+                    Sân chơi thảo luận chuyên sâu với 8K thành viên. Nơi chia sẻ kiến thức và giao lưu trực tiếp về
+                    Rap/Hiphop.
+                </p>
+            </a>
+        </div>
+
     </div>
 
     <hr class="my-5 text-muted opacity-25">
@@ -64,7 +104,6 @@ include 'templates/header.php';
             </div>
 
             <div class="accordion shadow-sm rounded" id="accordionFAQ">
-
                 <div class="accordion-item border-0 mb-2 rounded overflow-hidden">
                     <h2 class="accordion-header">
                         <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse"
