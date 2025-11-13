@@ -142,8 +142,8 @@ include 'templates/header.php';
                             highlight</li>
                         <li class="mb-2"><i class="bi bi-check-circle me-2 text-success"></i>1 video highlight</li>
                     </ul>
-                    <a href="http://localhost/booking-website/package-detail.php?id=goi-3"
-                        class="btn btn-warning schedio-btn-yellow mt-3 w-100">Xem chi tiết</a>
+                    <a href="./package-detail.php?id=goi-3" class="btn btn-warning schedio-btn-yellow mt-3 w-100">Xem
+                        chi tiết</a>
                 </div>
             </div>
         </div>
@@ -160,8 +160,8 @@ include 'templates/header.php';
                         <li class="mb-2"><i class="bi bi-check-circle me-2 text-success"></i>1 post bình luận về sản
                             phẩm</li>
                     </ul>
-                    <a href="http://localhost/booking-website/package-detail.php?id=goi-4"
-                        class="btn btn-warning schedio-btn-yellow mt-3 w-100">Xem chi tiết</a>
+                    <a href="./package-detail.php?id=goi-4" class="btn btn-warning schedio-btn-yellow mt-3 w-100">Xem
+                        chi tiết</a>
                 </div>
             </div>
         </div>
@@ -180,8 +180,8 @@ include 'templates/header.php';
                         <li class="mb-2"><i class="bi bi-check-circle me-2 text-success"></i>2 tuần ghim bài đăng trên
                             page</li>
                     </ul>
-                    <a href="http://localhost/booking-website/package-detail.php?id=goi-5"
-                        class="btn btn-warning schedio-btn-yellow mt-3 w-100">Xem chi tiết</a>
+                    <a href="./package-detail.php?id=goi-5" class="btn btn-warning schedio-btn-yellow mt-3 w-100">Xem
+                        chi tiết</a>
                 </div>
             </div>
         </div>

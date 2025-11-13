@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $current_page = basename($_SERVER['SCRIPT_NAME']);
 
 // ĐƯỜNG DẪN GỐC CỦA DỰ ÁN
-$base_url = '/booking-website';
+$base_url = '/Schedio';
 ?>
 
 <!DOCTYPE html>
@@ -74,21 +74,21 @@ $base_url = '/booking-website';
                 ===================================================
                 -->
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <?php
+                <?php
                     $avatar_url = !empty($_SESSION['user_avatar'])
                         ? $base_url . '/' . htmlspecialchars($_SESSION['user_avatar'])
                         : 'https://i.ibb.co/5Y8wNcz/user-placeholder.png';
                     ?>
-                    <div class="dropdown">
-                        <a href="<?php echo $base_url; ?>/customer/account.php" class="btn p-0 border-0 user-avatar-btn"
-                            title="Tài khoản của tôi">
-                            <img src="<?php echo $avatar_url; ?>" alt="Avatar" class="user-avatar-img">
-                        </a>
-                    </div>
-                <?php else: ?>
-                    <a href="<?php echo $base_url; ?>/login.php" class="btn btn-outline-dark btn-circle" title="Đăng nhập">
-                        <i class="bi bi-person"></i>
+                <div class="dropdown">
+                    <a href="<?php echo $base_url; ?>/customer/account.php" class="btn p-0 border-0 user-avatar-btn"
+                        title="Tài khoản của tôi">
+                        <img src="<?php echo $avatar_url; ?>" alt="Avatar" class="user-avatar-img">
                     </a>
+                </div>
+                <?php else: ?>
+                <a href="<?php echo $base_url; ?>/login.php" class="btn btn-outline-dark btn-circle" title="Đăng nhập">
+                    <i class="bi bi-person"></i>
+                </a>
                 <?php endif; ?>
 
             </div>
