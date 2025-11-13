@@ -1,44 +1,143 @@
 <?php
-// about.php
-include 'templates/header.php'; 
+include 'templates/header.php';
 ?>
 
 <div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-9">
-            <h1 class="display-5 fw-bold mb-3">🎵 Schedio – Đặt lịch truyền thông âm nhạc dễ dàng, quản lý chuyên nghiệp
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-10">
+            <h1 class="display-4 fw-bold text-dark-blue mb-3">Schedio – Công cụ đặt lịch truyền thông nhạc Rap/Hiphop
             </h1>
-
-            <p class="lead text-muted mb-4">
-                Nền tảng booking lịch đăng bài truyền thông trên fanpage, giúp nghệ sĩ và quản lý tự động hóa toàn bộ
-                quy trình – từ chọn gói dịch vụ đến triển khai nội dung.
+            <p class="lead text-muted">
+                Chúng tôi không chỉ là một công cụ đặt lịch. Schedio là cầu nối đưa âm nhạc của bạn chạm đến hàng triệu
+                khán giả trẻ thông qua hệ sinh thái truyền thông mạnh mẽ nhất hiện nay.
             </p>
-
-            <img src="https://i.ibb.co/3kXpSM9/about-us-image.jpg" alt="Schedio - Truyền thông âm nhạc"
-                class="img-fluid rounded shadow-sm mb-4">
-
-            <div class="about-content">
-                <p>Schedio là hệ thống thương mại điện tử chuyên biệt dành cho lĩnh vực truyền thông âm nhạc, giúp bạn
-                    kinh doanh và quản lý các chiến dịch đăng bài trên fanpage một cách hiệu quả và chuyên nghiệp.
-                    Schedio giúp bạn:</p>
-
-                <ul class="list-unstyled about-list">
-                    <li>Cho phép nghệ sĩ và quản lý lựa chọn gói truyền thông phù hợp.</li>
-                    <li>Cung cấp lịch đặt lịch đăng bài trên các nền tảng, minh bạch về thời gian và lượt đặt.</li>
-                    <li>Tự động hóa quy trình thanh toán và xác nhận đơn hàng.</li>
-                    <li>Theo dõi tiến độ và quản lý tất cả đơn hàng trang một nơi duy nhất.</li>
-                    <li>Chúng tôi cung cấp một trang quản trị (Admin Panel) với giao diện trực quan:</li>
-                    <li>Quản lý đơn hàng tập trung, theo dõi chi tiết trạng thái từng bài đăng.</li>
-                    <li>Tự động cập nhật lịch đăng bài tổng thể khi có đơn hàng mới.</li>
-                    <li>Điều chỉnh gói dịch vụ, giá cả, báo cáo doanh thu và phân quyền người dùng dễ dàng.</li>
-                    <li>Schedio hiện đang quản lý các kênh truyền thông hàng đầu:</li>
-                    <li>Page Grab Fan Tháng 9, Page Rap Fan Thám Thính, TikTok Grab Fan Tháng 9, và Group Cộng đồng Grab
-                        Việt Underground - giúp bạn lan tỏa âm nhạc đến đúng khán giả, đúng thời điểm.</li>
-                </ul>
-            </div>
-
         </div>
     </div>
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <img src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop"
+                alt="Schedio Team" class="img-fluid rounded-4 shadow-sm w-100"
+                style="height: 400px; object-fit: cover;">
+        </div>
+    </div>
+
+    <div class="row justify-content-center g-5 mb-5">
+        <div class="col-lg-5">
+            <h3 class="fw-bold text-dark-blue mb-3">Sứ mệnh của chúng tôi</h3>
+            <p class="text-justify">
+                Xuất phát điểm từ những người yêu Rap/Hip-hop, chúng tôi hiểu rằng một sản phẩm âm nhạc chất lượng cần
+                một chiến lược lan tỏa xứng tầm.
+                Schedio ra đời để giải quyết bài toán khó khăn nhất của nghệ sĩ độc lập: <strong>Làm sao để được lắng
+                    nghe?</strong>
+            </p>
+            <p>
+                Chúng tôi số hóa quy trình booking truyền thống rườm rà thành một trải nghiệm "One-click".
+                Giúp bạn tiết kiệm thời gian liên hệ, minh bạch về chi phí và chủ động hoàn toàn về thời gian ra mắt sản
+                phẩm.
+            </p>
+        </div>
+
+        <div class="col-lg-5">
+            <h3 class="fw-bold text-dark-blue mb-3">Hệ sinh thái truyền thông</h3>
+            <p>Schedio sở hữu và vận hành độc quyền các kênh truyền thông hàng đầu trong cộng đồng Rap Việt:</p>
+            <ul class="list-unstyled about-list">
+                <li><i class="bi bi-facebook text-primary me-2"></i> <strong>Page Grab Fan Tháng 9:</strong> Cộng đồng
+                    fan Rap sôi động nhất.</li>
+                <li><i class="bi bi-search text-primary me-2"></i> <strong>Page Rap Fan Thám Thính:</strong> Nơi cập
+                    nhật tin tức Underground nhanh nhất.</li>
+                <li><i class="bi bi-people-fill text-primary me-2"></i> <strong>Group Cộng đồng Grab Việt:</strong> Sân
+                    chơi thảo luận chuyên sâu.</li>
+                <li><i class="bi bi-tiktok text-dark me-2"></i> <strong>TikTok Channel:</strong> Đẩy trend và viral
+                    video ngắn.</li>
+            </ul>
+        </div>
+    </div>
+
+    <hr class="my-5 text-muted opacity-25">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold text-dark-blue">Câu hỏi thường gặp (FAQs)</h2>
+                <p class="text-muted">Giải đáp những thắc mắc phổ biến nhất khi sử dụng Schedio.</p>
+            </div>
+
+            <div class="accordion shadow-sm rounded" id="accordionFAQ">
+
+                <div class="accordion-item border-0 mb-2 rounded overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#faq1">
+                            1. Tôi cần đặt lịch trước bao lâu để đảm bảo có slot?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#accordionFAQ">
+                        <div class="accordion-body text-muted">
+                            Để đảm bảo chất lượng nội dung và đội ngũ Admin kịp thời thiết kế Poster/Video cho bạn, hệ
+                            thống yêu cầu đặt lịch trước tối thiểu <strong>12 tiếng</strong>. Tuy nhiên, để chọn được
+                            các khung "giờ vàng" (20:00 - 21:00), chúng tôi khuyên bạn nên đặt trước từ 3-5 ngày.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0 mb-2 rounded overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#faq2">
+                            2. Nếu tôi chưa có Poster hay Video thì sao?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                        <div class="accordion-body text-muted">
+                            Đừng lo! Tất cả các gói dịch vụ của Schedio (trừ gói chia sẻ link) đều đã bao gồm phí thiết
+                            kế. Bạn chỉ cần gửi file nhạc (Audio), lời bài hát (Lyrics) và ý tưởng. Đội ngũ thiết kế của
+                            chúng tôi sẽ làm Poster và Video Highlight gửi bạn duyệt trước khi đăng.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0 mb-2 rounded overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#faq3">
+                            3. Tôi có thể hủy đơn hàng sau khi đã thanh toán không?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                        <div class="accordion-body text-muted">
+                            Nếu bài viết chưa được đăng, bạn có thể liên hệ với Admin qua Hotline/Zalo để yêu cầu hủy
+                            hoặc dời lịch. Tuy nhiên, việc hoàn tiền sẽ phụ thuộc vào tiến độ công việc (ví dụ: nếu
+                            Admin đã thiết kế xong Poster thì sẽ trừ chi phí thiết kế).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0 mb-2 rounded overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#faq4">
+                            4. Làm sao để biết bài của tôi đã được đăng?
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                        <div class="accordion-body text-muted">
+                            Hệ thống sẽ cập nhật trạng thái đơn hàng thành "Hoàn thành" ngay khi bài lên sóng. Đồng
+                            thời, bạn có thể vào mục <strong>"Lịch sử đơn hàng"</strong>, chúng tôi sẽ gắn link bài viết
+                            trực tiếp tại đó để bạn kiểm tra và tương tác.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <p class="mb-3">Bạn còn câu hỏi khác?</p>
+        <a href="contact.php" class="btn btn-outline-primary rounded-pill px-4">Liên hệ tư vấn ngay</a>
+    </div>
+
 </div>
 
 <?php include 'templates/footer.php'; ?>
