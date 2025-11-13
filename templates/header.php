@@ -7,8 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // Lấy tên file hiện tại để active menu
 $current_page = basename($_SERVER['SCRIPT_NAME']);
 
-// ĐƯỜNG DẪN GỐC CỦA DỰ ÁN (Quan trọng để link không bị lỗi khi vào thư mục con)
-// Nếu bạn đổi tên thư mục dự án, hãy đổi dòng này: '/tên-thư-mục-của-bạn'
+// ĐƯỜNG DẪN GỐC CỦA DỰ ÁN
 $base_url = '/booking-website';
 ?>
 
@@ -58,15 +57,10 @@ $base_url = '/booking-website';
                                 href="<?php echo $base_url; ?>/services.php">BẢNG GIÁ</a>
                         </li>
 
-                        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'customer'): ?>
                         <li class="nav-item">
-                            <a class="nav-link text-primary fw-bold <?php echo ($current_page == 'booking.php') ? 'active' : ''; ?>"
-                                href="<?php echo $base_url; ?>/customer/booking.php">
-                                <i class="bi bi-calendar-plus me-1"></i> ĐẶT HÀNG & LÊN LỊCH
-                            </a>
+                            <a class="nav-link <?php echo ($current_page == 'clients.php') ? 'active' : ''; ?>"
+                                href="<?php echo $base_url; ?>/clients.php">KHÁCH HÀNG TIÊU BIỂU</a>
                         </li>
-                        <?php endif; ?>
-
                         <li class="nav-item">
                             <a class="nav-link <?php echo ($current_page == 'contact.php') ? 'active' : ''; ?>"
                                 href="<?php echo $base_url; ?>/contact.php">LIÊN HỆ</a>
@@ -74,15 +68,27 @@ $base_url = '/booking-website';
                     </ul>
                 </div>
 
+                <!-- 
+                ===================================================
+                PHẦN HIỂN THỊ AVATAR/ICON ĐĂNG NHẬP (ĐÃ SỬA)
+                ===================================================
+                -->
                 <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="<?php echo $base_url; ?>/customer/profile.php" class="btn btn-outline-dark btn-circle"
-                    title="Tài khoản của tôi">
-                    <i class="bi bi-person-check-fill"></i>
-                </a>
+                    <?php
+                    $avatar_url = !empty($_SESSION['user_avatar'])
+                        ? $base_url . '/' . htmlspecialchars($_SESSION['user_avatar'])
+                        : 'https://i.ibb.co/5Y8wNcz/user-placeholder.png';
+                    ?>
+                    <div class="dropdown">
+                        <a href="<?php echo $base_url; ?>/customer/account.php" class="btn p-0 border-0 user-avatar-btn"
+                            title="Tài khoản của tôi">
+                            <img src="<?php echo $avatar_url; ?>" alt="Avatar" class="user-avatar-img">
+                        </a>
+                    </div>
                 <?php else: ?>
-                <a href="<?php echo $base_url; ?>/login.php" class="btn btn-outline-dark btn-circle" title="Đăng nhập">
-                    <i class="bi bi-person"></i>
-                </a>
+                    <a href="<?php echo $base_url; ?>/login.php" class="btn btn-outline-dark btn-circle" title="Đăng nhập">
+                        <i class="bi bi-person"></i>
+                    </a>
                 <?php endif; ?>
 
             </div>
