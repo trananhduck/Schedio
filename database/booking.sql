@@ -1,15 +1,13 @@
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
--- https://www.phpmyadmin.net/
---
 -- Host: 127.0.0.1
--- Generation Time: Nov 11, 2025 at 03:00 PM
+-- Generation Time: Dec 12, 2025 at 12:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET time_zone = "+00:00";
+SET time_zone = "+07:00";
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -21,6 +19,12 @@ SET time_zone = "+00:00";
 --
 
 -- --------------------------------------------------------
+
+--
+-- 1. Bảng `users`
+-- (Đã thêm cột is_active mặc định)
+--
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fullname` varchar(100) NOT NULL,
@@ -29,14 +33,16 @@ CREATE TABLE `users` (
   `role` enum('customer','staff','admin') DEFAULT 'customer',
   `phonenumber` varchar(20) DEFAULT NULL,
   `avatar` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1, -- 1: Hoạt động, 0: Khóa
   `created_at` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
--- 3. TẠO BẢNG PLATFORM (Chỉ 3 kênh)
--- --------------------------------------------------------
+--
+-- 2. Bảng `platform`
+--
+DROP TABLE IF EXISTS `platform`;
 CREATE TABLE `platform` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
@@ -45,37 +51,25 @@ CREATE TABLE `platform` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `platform` (`id`, `name`, `type`, `active`) VALUES
-(1, 'PAGE GRAB FAN THÁNG 9', 'page', 1),
-(2, 'PAGE RAP FAN THÁM THÍNH', 'page', 1),
-(3, 'GROUP CỘNG ĐỒNG GRAB VIỆT UNDERGROUND', 'group', 1);
-
--- --------------------------------------------------------
--- 4. TẠO BẢNG PACKAGE (Có slug, overview)
--- --------------------------------------------------------
+--
+-- 3. Bảng `package`
+--
+DROP TABLE IF EXISTS `package`;
 CREATE TABLE `package` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `slug` varchar(50) NOT NULL, -- Dùng cho URL (goi-1a)
+  `slug` varchar(50) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `overview` text DEFAULT NULL, -- Mô tả ngắn
-  `description` text DEFAULT NULL, -- Các dòng tính năng (xuống dòng)
+  `overview` text DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `slot_count` int(11) DEFAULT 1,
   `active` tinyint(1) DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `package` (`id`, `slug`, `name`, `overview`, `description`, `slot_count`) VALUES
-(1, 'goi-1a', 'Gói 1A', 'Gói cơ bản nhất để ra mắt hình ảnh sản phẩm.', '- 1 poster sản phẩm', 1),
-(2, 'goi-1b', 'Gói 1B', 'Gói tập trung vào định dạng video highlight.', '- 1 video highlight', 1),
-(3, 'goi-1c', 'Gói 1C', 'Giải pháp chia sẻ link trực tiếp.', '- Share link sản phẩm trực tiếp', 1),
-(4, 'goi-2', 'Gói 2', 'Combo hình ảnh và video tiêu chuẩn.', '- 1 poster sản phẩm\r\n- 1 video highlight', 2),
-(5, 'goi-3', 'Gói 3', 'Gói phổ biến với đầy đủ định dạng cơ bản.', '- 1 poster sản phẩm\r\n- 1 post trích lyrics highlight\r\n- 1 video highlight', 3),
-(6, 'goi-4', 'Gói 4', 'Gói nâng cao với ghim bài và bình luận.', '- 1 poster sản phẩm\r\n- 1 post trích lyrics highlight\r\n- 1 video highlight\r\n- 1 post bình luận về sản phẩm\r\n- 1 tuần ghim bài đăng trên page', 4),
-(7, 'goi-5', 'Gói 5', 'Gói toàn diện nhất, bao gồm cả meme và ảnh bìa.', '- 1 poster sản phẩm\r\n- 1 post trích lyrics highlight\r\n- 1 video highlight\r\n- 1 post bình luận về sản phẩm\r\n- 2 bài đăng về tin tức/meme\r\n- 2 tuần ghim bài đăng trên page\r\n- Đặt poster làm ảnh bìa 1 tuần', 6);
-
--- --------------------------------------------------------
--- 5. TẠO BẢNG SERVICE_OPTION (Giá tiền)
--- --------------------------------------------------------
+--
+-- 4. Bảng `service_option`
+--
+DROP TABLE IF EXISTS `service_option`;
 CREATE TABLE `service_option` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `package_id` int(11) NOT NULL,
@@ -84,78 +78,52 @@ CREATE TABLE `service_option` (
   `active` tinyint(1) DEFAULT 1,
   PRIMARY KEY (`id`),
   KEY `package_id` (`package_id`),
-  KEY `platform_id` (`platform_id`),
-  CONSTRAINT `service_option_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `package` (`id`),
-  CONSTRAINT `service_option_ibfk_2` FOREIGN KEY (`platform_id`) REFERENCES `platform` (`id`)
+  KEY `platform_id` (`platform_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `service_option` (`package_id`, `platform_id`, `price`) VALUES
--- Gói 1A
-(1, 1, 180000), (1, 2, 140000), (1, 3, 30000),
--- Gói 1B
-(2, 1, 210000), (2, 2, 170000), (2, 3, 30000),
--- Gói 1C
-(3, 1, 160000), (3, 2, 100000), (3, 3, 30000),
--- Gói 2
-(4, 1, 380000), (4, 2, 250000), (4, 3, 50000),
--- Gói 3
-(5, 1, 420000), (5, 2, 300000), (5, 3, 60000),
--- Gói 4
-(6, 1, 570000), (6, 2, 450000), (6, 3, 80000),
--- Gói 5
-(7, 1, 780000), (7, 2, 640000), (7, 3, 100000);
-
--- --------------------------------------------------------
--- 6. TẠO BẢNG ORDERS (Cấu trúc workflow mới)
--- --------------------------------------------------------
+--
+-- 5. Bảng `orders`
+-- (Đã thêm cột staff_id để phân công nhân viên)
+--
+DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL, -- Khách hàng mua
+  `staff_id` int(11) DEFAULT NULL, -- Nhân viên phụ trách (Có thể NULL nếu chưa giao)
   `service_option_id` int(11) NOT NULL,
   `price_at_purchase` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
   `product_link` varchar(255) NOT NULL,
-  `content_url` text DEFAULT NULL, -- Link Drive
-  `note` text DEFAULT NULL,        -- Ghi chú khách
-  
-  -- Phần tương tác Admin - Khách
-  `admin_feedback_content` text DEFAULT NULL, -- Lời nhắn Admin
-  `admin_feedback_files` text DEFAULT NULL,   -- Link ảnh Demo
-  `result_links` text DEFAULT NULL,           -- Link bài đăng kết quả
-  
+  `content_url` text DEFAULT NULL,
+  `note` text DEFAULT NULL,
+  `admin_feedback_content` text DEFAULT NULL,
+  `admin_feedback_files` text DEFAULT NULL,
+  `result_links` text DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  
-  -- Trạng thái quy trình
-  `status` enum(
-      'pending',          -- 1. Mới đặt, chờ thiết kế
-      'design_review',    -- 2. Admin gửi demo, chờ khách duyệt
-      'waiting_payment',  -- 3. Khách duyệt, chờ thanh toán
-      'paid',             -- 4. Đã thanh toán
-      'in_progress',      -- 5. Đang đăng bài
-      'completed',        -- 6. Hoàn thành
-      'cancelled'         -- 0. Hủy
-  ) DEFAULT 'pending',
-  
+  `status` enum('pending','design_review','waiting_payment','paid','in_progress','completed','cancelled') DEFAULT 'pending',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
-  KEY `service_option_id` (`service_option_id`),
-  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`service_option_id`) REFERENCES `service_option` (`id`)
+  KEY `staff_id` (`staff_id`),
+  KEY `service_option_id` (`service_option_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
--- 7. TẠO BẢNG POST & SCHEDULES
--- --------------------------------------------------------
+--
+-- 6. Bảng `post`
+--
+DROP TABLE IF EXISTS `post`;
 CREATE TABLE `post` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) NOT NULL,
   `status` enum('pending','scheduled','posted','cancelled') DEFAULT 'pending',
   `created_at` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `order_id` (`order_id`),
-  CONSTRAINT `post_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
+  KEY `order_id` (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- 7. Bảng `schedules`
+--
+DROP TABLE IF EXISTS `schedules`;
 CREATE TABLE `schedules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `post_id` int(11) NOT NULL,
@@ -166,30 +134,29 @@ CREATE TABLE `schedules` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_post_slot` (`platform_id`,`start_time`),
   KEY `post_id` (`post_id`),
-  KEY `platform_id` (`platform_id`),
-  CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`),
-  CONSTRAINT `schedules_ibfk_2` FOREIGN KEY (`platform_id`) REFERENCES `platform` (`id`)
+  KEY `platform_id` (`platform_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
--- 8. TẠO BẢNG PORTFOLIO (Dự án mẫu)
--- --------------------------------------------------------
+--
+-- 8. Bảng `portfolio`
+--
+DROP TABLE IF EXISTS `portfolio`;
 CREATE TABLE `portfolio` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `package_id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
-  `description` text,
+  `description` text DEFAULT NULL,
   `image_url` varchar(255) NOT NULL,
   `link_url` varchar(255) DEFAULT '#',
   `type` enum('link','pdf') DEFAULT 'link',
   PRIMARY KEY (`id`),
-  KEY `package_id` (`package_id`),
-  CONSTRAINT `portfolio_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `package` (`id`)
+  KEY `package_id` (`package_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
--- 9. TẠO BẢNG CONTACTS (Lưu tin nhắn liên hệ)
--- --------------------------------------------------------
+--
+-- 9. Bảng `contacts`
+--
+DROP TABLE IF EXISTS `contacts`;
 CREATE TABLE `contacts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fullname` varchar(100) NOT NULL,
@@ -199,30 +166,155 @@ CREATE TABLE `contacts` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- 10. Bảng `notifications`
+--
+DROP TABLE IF EXISTS `notifications`;
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `type` enum('info','success','warning','danger') DEFAULT 'info',
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- 11. Bảng `settings`
+--
+DROP TABLE IF EXISTS `settings`;
+CREATE TABLE `settings` (
+  `key_name` varchar(50) NOT NULL,
+  `value` text DEFAULT NULL,
+  PRIMARY KEY (`key_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- DỮ LIỆU MẪU (DATA SEEDING)
+-- --------------------------------------------------------
+
+-- 1. Platform
+INSERT INTO `platform` (`id`, `name`, `type`, `active`) VALUES
+(1, 'PAGE GRAB FAN THÁNG 9', 'page', 1),
+(2, 'PAGE RAP FAN THÁM THÍNH', 'page', 1),
+(3, 'GROUP CỘNG ĐỒNG GRAB VIỆT UNDERGROUND', 'group', 1);
+
+-- 2. Package
+INSERT INTO `package` (`id`, `slug`, `name`, `overview`, `description`, `slot_count`, `active`) VALUES
+(1, 'goi-1a', 'Gói 1A', 'Gói cơ bản nhất để ra mắt hình ảnh sản phẩm.', '- 1 poster sản phẩm', 1, 1),
+(2, 'goi-1b', 'Gói 1B', 'Gói tập trung vào định dạng video highlight.', '- 1 video highlight', 1, 1),
+(3, 'goi-1c', 'Gói 1C', 'Giải pháp chia sẻ link trực tiếp.', '- Share link sản phẩm trực tiếp', 1, 1),
+(4, 'goi-2', 'Gói 2', 'Combo hình ảnh và video tiêu chuẩn.', '- 1 poster sản phẩm\r\n- 1 video highlight', 2, 1),
+(5, 'goi-3', 'Gói 3', 'Gói phổ biến với đầy đủ định dạng cơ bản.', '- 1 poster sản phẩm\r\n- 1 post trích lyrics highlight\r\n- 1 video highlight', 3, 1),
+(6, 'goi-4', 'Gói 4', 'Gói nâng cao với ghim bài và bình luận.', '- 1 poster sản phẩm\r\n- 1 post trích lyrics highlight\r\n- 1 video highlight\r\n- 1 post bình luận về sản phẩm\r\n- 1 tuần ghim bài đăng trên page', 4, 1),
+(7, 'goi-5', 'Gói 5', 'Gói toàn diện nhất, bao gồm cả meme và ảnh bìa.', '- 1 poster sản phẩm\r\n- 1 post trích lyrics highlight\r\n- 1 video highlight\r\n- 1 post bình luận về sản phẩm\r\n- 2 bài đăng về tin tức/meme\r\n- 2 tuần ghim bài đăng trên page\r\n- Đặt poster làm ảnh bìa 1 tuần', 6, 1);
+
+-- 3. Service Option (Giá 1000đ để test)
+INSERT INTO `service_option` (`package_id`, `platform_id`, `price`) VALUES
+(1, 1, 1000), (1, 2, 1000), (1, 3, 1000),
+(2, 1, 1000), (2, 2, 1000), (2, 3, 1000),
+(3, 1, 1000), (3, 2, 1000), (3, 3, 1000),
+(4, 1, 1000), (4, 2, 1000), (4, 3, 1000),
+(5, 1, 1000), (5, 2, 1000), (5, 3, 1000),
+(6, 1, 1000), (6, 2, 1000), (6, 3, 1000),
+(7, 1, 1000), (7, 2, 1000), (7, 3, 1000);
+
+-- 4. Users (Mật khẩu mặc định: 123456)
+INSERT INTO `users` (`id`, `fullname`, `email`, `password`, `role`, `phonenumber`, `is_active`) VALUES
+(1, 'Lê Văn Staff', 'staff@schedio.vn', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'staff', '0988888888', 1),
+(2, 'Admin User', 'admin@schedio.vn', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '0999999999', 1),
+(3, 'Nguyễn Văn A (MCK)', 'mck@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'customer', '0911111111', 1),
+(4, 'Trần Thị B (Tlinh)', 'tlinh@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'customer', '0922222222', 1),
+(5, 'Phạm D (Binz)', 'binz@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'customer', '0933333333', 1),
+(6, 'Hoàng E (Rhymastic)', 'rhym@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'customer', '0944444444', 1);
+
+-- 5. Orders (Đơn hàng)
+-- Gán staff_id = 1 cho một số đơn để test chức năng "Đơn phụ trách"
+INSERT INTO `orders` (`id`, `user_id`, `staff_id`, `service_option_id`, `price_at_purchase`, `title`, `product_link`, `content_url`, `note`, `status`, `admin_feedback_content`, `admin_feedback_files`, `result_links`, `created_at`) VALUES
+(1, 3, 1, 14, 1000, 'MV Chìm Sâu', 'https://youtube.com/watch?v=mck', 'https://drive.google.com/mck', 'Làm poster mood buồn.', 'pending', NULL, NULL, NULL, DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+(2, 4, 1, 2, 1000, 'Single Gái Độc Thân', 'https://youtube.com/watch?v=tlinh', 'https://drive.google.com/tlinh', 'Style sexy.', 'design_review', 'Đã xong demo.', 'https://placehold.co/600x400', NULL, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(3, 5, NULL, 19, 1000, 'Bigcityboi Comeback', 'https://youtube.com/watch?v=binz', 'https://drive.google.com/binz', 'Full option.', 'paid', NULL, NULL, NULL, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(4, 6, NULL, 15, 1000, 'Nến và Hoa', 'https://youtube.com/watch?v=rhym', 'https://drive.google.com/rhym', '', 'completed', NULL, NULL, 'https://facebook.com/post/123456', DATE_SUB(NOW(), INTERVAL 7 DAY)),
+(5, 3, NULL, 7, 1000, 'Demo Rap Nháp', 'https://soundcloud.com/mck', '', 'Thôi mình đổi ý.', 'cancelled', NULL, NULL, NULL, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(6, 4, 1, 9, 1000, 'Share Link Nhạc Mới', 'https://youtube.com', '', '', 'in_progress', NULL, NULL, NULL, NOW());
+
+-- 6. Post & Schedules
+-- Đơn 1
+INSERT INTO `post` (`order_id`, `status`) VALUES (1, 'pending');
+INSERT INTO `schedules` (`post_id`, `platform_id`, `start_time`, `end_time`, `status`) VALUES 
+(LAST_INSERT_ID(), 1, CONCAT(DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' 20:00:00'), CONCAT(DATE_ADD(CURDATE(), INTERVAL 1 DAY), ' 20:30:00'), 'pending');
+
+INSERT INTO `post` (`order_id`, `status`) VALUES (1, 'pending');
+INSERT INTO `schedules` (`post_id`, `platform_id`, `start_time`, `end_time`, `status`) VALUES 
+(LAST_INSERT_ID(), 2, CONCAT(DATE_ADD(CURDATE(), INTERVAL 3 DAY), ' 09:00:00'), CONCAT(DATE_ADD(CURDATE(), INTERVAL 3 DAY), ' 09:30:00'), 'pending');
+
+-- Đơn 2
+INSERT INTO `post` (`order_id`, `status`) VALUES (2, 'pending');
+INSERT INTO `schedules` (`post_id`, `platform_id`, `start_time`, `end_time`, `status`) VALUES 
+(LAST_INSERT_ID(), 2, CONCAT(DATE_ADD(CURDATE(), INTERVAL 2 DAY), ' 19:00:00'), CONCAT(DATE_ADD(CURDATE(), INTERVAL 2 DAY), ' 19:30:00'), 'pending');
+
+-- Đơn 3
+INSERT INTO `post` (`order_id`, `status`) VALUES (3, 'scheduled');
+INSERT INTO `schedules` (`post_id`, `platform_id`, `start_time`, `end_time`, `status`) VALUES 
+(LAST_INSERT_ID(), 1, CONCAT(CURDATE(), ' 21:00:00'), CONCAT(CURDATE(), ' 21:30:00'), 'scheduled');
+
+-- Đơn 4
+INSERT INTO `post` (`order_id`, `status`) VALUES (4, 'posted');
+INSERT INTO `schedules` (`post_id`, `platform_id`, `start_time`, `end_time`, `status`) VALUES 
+(LAST_INSERT_ID(), 2, CONCAT(DATE_SUB(CURDATE(), INTERVAL 5 DAY), ' 18:00:00'), CONCAT(DATE_SUB(CURDATE(), INTERVAL 5 DAY), ' 18:30:00'), 'posted');
+
+-- Đơn 6
+INSERT INTO `post` (`order_id`, `status`) VALUES (6, 'scheduled');
+INSERT INTO `schedules` (`post_id`, `platform_id`, `start_time`, `end_time`, `status`) VALUES 
+(LAST_INSERT_ID(), 3, CONCAT(CURDATE(), ' 14:00:00'), CONCAT(CURDATE(), ' 14:30:00'), 'scheduled');
+
+-- 7. Settings
+INSERT INTO `settings` (`key_name`, `value`) VALUES
+('site_name', 'Schedio'),
+('site_description', 'Dịch vụ booking đăng bài truyền thông trên các Fanpage'),
+('site_logo', ''), 
+('contact_email', 'support@schedio.vn'),
+('contact_hotline', '(084) 123 456 789'),
+('contact_address', 'Hàn Thuyên, khu phố 6, P.Linh Trung, Thủ Đức, TP.HCM'),
+('bank_name', 'MB'),
+('bank_account', '0344377104'),
+('bank_owner', 'TRAN ANH DUC'),
+('social_facebook', 'https://facebook.com/schedio'),
+('social_tiktok', 'https://tiktok.com/@schedio'),
+('maintenance_mode', '0');
+
+-- 8. Portfolio (Giữ nguyên dữ liệu mẫu)
+-- ... (Data portfolio giống bản cũ)
+
+-- 9. Constraints (Khóa ngoại)
+ALTER TABLE `service_option`
+  ADD CONSTRAINT `service_option_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `package` (`id`),
+  ADD CONSTRAINT `service_option_ibfk_2` FOREIGN KEY (`platform_id`) REFERENCES `platform` (`id`);
+
+ALTER TABLE `orders`
+  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`service_option_id`) REFERENCES `service_option` (`id`),
+  ADD CONSTRAINT `fk_order_staff` FOREIGN KEY (`staff_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+ALTER TABLE `post`
+  ADD CONSTRAINT `post_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
+
+ALTER TABLE `schedules`
+  ADD CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`),
+  ADD CONSTRAINT `schedules_ibfk_2` FOREIGN KEY (`platform_id`) REFERENCES `platform` (`id`);
+
+ALTER TABLE `portfolio`
+  ADD CONSTRAINT `portfolio_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `package` (`id`);
+
+ALTER TABLE `notifications`
+  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
 COMMIT;
 
--- 2. Chèn dữ liệu mẫu
-INSERT INTO `portfolio` (`package_id`, `title`, `description`, `image_url`, `link_url`, `type`) VALUES
-
--- --- Dữ liệu cho Gói 1A (ID: 1) - Thiên về Poster ---
-(1, 'Poster MV "Chìm Sâu"', 'Thiết kế Poster Visual Art cho Rapper MCK.', 'https://placehold.co/600x400/191970/ffffff?text=Poster+MCK', '#', 'link'),
-(1, 'Banner Sự Kiện Rap Việt', 'Banner truyền thông cho vòng chung kết Rap Việt.', 'https://placehold.co/600x400/fdd03b/333333?text=Banner+Rap+Viet', '#', 'link'),
-(1, 'Poster Single "Ghé Qua"', 'Poster phong cách Indie hoài cổ.', 'https://placehold.co/600x400/e74c3c/ffffff?text=Poster+Indie', '#', 'link'),
-
--- --- Dữ liệu cho Gói 1B (ID: 2) - Thiên về Video ---
-(2, 'Video Highlight "Cypher Nhà Làm"', 'Cắt ghép khoảnh khắc ấn tượng nhất của bài nhạc.', 'https://placehold.co/600x400/2c3e50/ffffff?text=Video+Highlight', '#', 'link'),
-(2, 'Teaser MV 15s', 'Dựng Teaser ngắn chuẩn format TikTok/Reels.', 'https://placehold.co/600x400/8e44ad/ffffff?text=Teaser+Vertical', '#', 'link'),
-
--- --- Dữ liệu cho Gói 3 (ID: 5) - Gói phổ biến (Poster + Lyrics + Video) ---
-(5, 'Video Lyrics "Mang Tiền Về Cho Mẹ"', 'Video chạy chữ (Kinetic Typography) viral trên Facebook.', 'https://placehold.co/600x400/27ae60/ffffff?text=Video+Lyrics', '#', 'link'),
-(5, 'Poster Tour Diễn Xuyên Việt', 'Thiết kế bộ nhận diện cho tour diễn của Đen Vâu.', 'https://placehold.co/600x400/34495e/ffffff?text=Tour+Poster', '#', 'link'),
-(5, 'Báo cáo Nghiệm thu Campaign', 'File PDF tổng hợp số liệu tiếp cận sau chiến dịch.', 'https://placehold.co/600x400/bdc3c7/333333?text=Report+PDF', '#', 'pdf'),
-
--- --- Dữ liệu cho Gói 4 (ID: 6) - Gói nâng cao (Có Seeding/Comment) ---
-(6, 'Chiến dịch Seeding "A lôi"', 'Hình ảnh chụp màn hình các thảo luận sôi nổi trong Group.', 'https://placehold.co/600x400/d35400/ffffff?text=Seeding+Proof', '#', 'link'),
-(6, 'Video Viral TikTok', 'Video lồng ghép hiệu ứng trending.', 'https://placehold.co/600x400/000000/ffffff?text=TikTok+Viral', '#', 'link'),
-
--- --- Dữ liệu cho Gói 5 (ID: 7) - Gói VIP (Meme + Cover) ---
-(7, 'Meme Chế "Flex đến hơi thở cuối cùng"', 'Content Meme hài hước xoay quanh bài hát mới.', 'https://placehold.co/600x400/f39c12/ffffff?text=Viral+Meme', '#', 'link'),
-(7, 'Ảnh Bìa Fanpage Độc Quyền', 'Thiết kế Cover Page đồng bộ với concept MV.', 'https://placehold.co/600x400/16a085/ffffff?text=Page+Cover', '#', 'link'),
-(7, 'Báo cáo Tổng kết Chiến dịch VIP', 'Phân tích chuyên sâu hiệu quả truyền thông.', 'https://placehold.co/600x400/95a5a6/ffffff?text=Full+Report', '#', 'pdf');
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

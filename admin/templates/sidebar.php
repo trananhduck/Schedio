@@ -13,23 +13,29 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <a href="dashboard.php" class="nav-link <?php echo $current_page == 'dashboard.php' ? 'active' : ''; ?>">
                 <i class="bi bi-grid-fill"></i> Bảng điều khiển
             </a>
-            <a href="orders.php" class="nav-link <?php echo $current_page == 'orders.php' ? 'active' : ''; ?>">
+
+            <a href="orders.php"
+                class="nav-link <?php echo ($current_page == 'orders.php' || $current_page == 'order_detail.php') ? 'active' : ''; ?>">
                 <i class="bi bi-cart3"></i> Quản lý đơn hàng
             </a>
 
-            <a href="#" class="nav-link">
+            <a href="calendar.php" class="nav-link <?php echo $current_page == 'calendar.php' ? 'active' : ''; ?>">
                 <i class="bi bi-calendar-week"></i> Lịch đăng bài
             </a>
-            <a href="#" class="nav-link">
+
+            <a href="packages.php" class="nav-link <?php echo $current_page == 'packages.php' ? 'active' : ''; ?>">
                 <i class="bi bi-box-seam"></i> Quản lý gói dịch vụ
             </a>
-            <a href="#" class="nav-link">
+
+            <a href="users.php" class="nav-link <?php echo $current_page == 'users.php' ? 'active' : ''; ?>">
                 <i class="bi bi-people"></i> Quản lý người dùng
             </a>
-            <a href="#" class="nav-link">
+
+            <a href="reports.php" class="nav-link <?php echo $current_page == 'reports.php' ? 'active' : ''; ?>">
                 <i class="bi bi-bar-chart-line"></i> Báo cáo thống kê
             </a>
-            <a href="#" class="nav-link">
+
+            <a href="settings.php" class="nav-link <?php echo $current_page == 'settings.php' ? 'active' : ''; ?>">
                 <i class="bi bi-gear"></i> Cài đặt hệ thống
             </a>
         </nav>
