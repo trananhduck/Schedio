@@ -69,20 +69,29 @@ function renderCartButton($slug, $name, $platform, $price, $slots)
                         // Tách tính năng
                         $features = explode("\n", $pkg['description']);
 
-                        // Lấy giá
+                        // --- ĐOẠN SỬA ĐỔI: LẤY GIÁ THEO ID (CHÍNH XÁC 100%) ---
                         $prices = [];
-                        $sql_p = "SELECT so.price, pl.name FROM service_option so 
-                                  JOIN platform pl ON so.platform_id = pl.id 
-                                  WHERE so.package_id = " . $pkg['id'];
+                        // Lấy thêm cột platform_id
+                        $sql_p = "SELECT so.price, so.platform_id 
+                      FROM service_option so 
+                      WHERE so.package_id = " . $pkg['id'];
+
                         $res_p = $conn->query($sql_p);
                         while ($row = $res_p->fetch_assoc()) {
-                            $prices[$row['name']] = ($row['price'] >= 1000) ? ($row['price'] / 1000) . 'k' : $row['price'];
+                            // Lưu vào mảng với Key là ID của Platform (1, 2, 3)
+                            $prices[$row['platform_id']] = ($row['price'] >= 1000) ? number_format($row['price'] / 1000) . 'k' : $row['price'];
                         }
 
-                        $p1 = $prices['PAGE GRAB FAN THÁNG 9'] ?? '--';
-                        $p2 = $prices['PAGE RAP FAN THÁM THÍNH'] ?? '--';
-                        $p3 = $prices['GROUP CỘNG ĐỒNG GRAB VIỆT UNDERGROUND'] ?? '--';
+                        // Gán biến dựa trên ID (Khớp với DB bạn đã import)
+                        // ID 1 = PAGE GRAB FAN THÁNG 9
+                        $p1 = $prices[1] ?? '--';
+                        // ID 2 = PAGE RAP FAN THÁM THÍNH
+                        $p2 = $prices[2] ?? '--';
+                        // ID 3 = GROUP CỘNG ĐỒNG...
+                        $p3 = $prices[3] ?? '--';
+
                         $slots = $pkg['slot_count'];
+                        // -----------------------------------------------------
                 ?>
                         <tr>
                             <td class="fw-bold">
@@ -106,12 +115,15 @@ function renderCartButton($slug, $name, $platform, $price, $slots)
 
                             <td class="text-center align-middle">
                                 <strong class="d-block mb-1"><?php echo $p3; ?></strong>
-                                <?php if ($is_logged_in && $p3 != '--') renderCartButton($pkg['slug'], $pkg['name'], 'GROUP CỘNG ĐỒNG GRAB VIỆT UNDERGROUND', $p3, $slots); ?>
+                                <?php
+                                // Tên platform dài quá nên code cũ có thể gây lỗi khi truyền vào JS, nên dùng tên chuẩn
+                                if ($is_logged_in && $p3 != '--')
+                                    renderCartButton($pkg['slug'], $pkg['name'], 'GROUP CỘNG ĐỒNG GRAB VIỆT UNDERGROUND', $p3, $slots);
+                                ?>
                             </td>
 
                             <td class="text-center align-middle">
-                                <a href="package-detail.php?id=<?php echo $pkg['slug']; ?>"
-                                    class="btn btn-outline-dark btn-sm">Xem</a>
+                                <a href="#" class="btn btn-outline-dark btn-sm">Xem</a>
                             </td>
                         </tr>
                 <?php endwhile;

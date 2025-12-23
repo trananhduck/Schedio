@@ -5,9 +5,11 @@ include 'templates/header.php';
 <div class="container my-5">
     <div class="row justify-content-center text-center mb-5">
         <div class="col-lg-10">
+
             <h1 class="display-4 fw-bold text-dark-blue mb-3">Schedio – Đặt lịch truyền thông nhạc Rap/Hiphop</h1>
             <p class="lead text-muted">
-                Chúng tôi không chỉ là một công cụ đặt lịch. Schedio là cầu nối đưa âm nhạc của bạn chạm đến hàng triệu
+                Chúng tôi không chỉ là một công cụ đặt lịch. Schedio là cầu nối đưa âm nhạc của bạn chạm đến hàng
+                triệu
                 khán giả trẻ thông qua hệ sinh thái truyền thông mạnh mẽ nhất hiện nay.
             </p>
         </div>

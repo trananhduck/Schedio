@@ -17,8 +17,8 @@ include 'templates/header.php';
 
     <div class="row align-items-center mb-5 g-5">
         <div class="col-lg-6">
-            <img src="https://i.ibb.co/3kXpSM9/about-us-image.jpg" alt="MCK Campaign"
-                class="img-fluid rounded-4 shadow-lg w-100" style="height: 400px; object-fit: cover;">
+            <img src="./assets/images/mck.jpg" alt="MCK Campaign" class="img-fluid rounded-4 shadow-lg w-100"
+                style="height: 400px; object-fit: cover;">
         </div>
         <div class="col-lg-6">
             <span class="badge bg-warning text-dark mb-2">RAPPER / HIPHOP</span>
@@ -54,8 +54,8 @@ include 'templates/header.php';
 
     <div class="row align-items-center mb-5 g-5 flex-row-reverse">
         <div class="col-lg-6">
-            <img src="https://i.ibb.co/L5Tz5Vd/hero-calendar-img.png" alt="Den Vau Campaign"
-                class="img-fluid rounded-4 shadow-lg w-100" style="height: 400px; object-fit: cover;">
+            <img src="./assets/images/den.jpg" alt="Den Vau Campaign" class="img-fluid rounded-4 shadow-lg w-100"
+                style="height: 400px; object-fit: cover;">
         </div>
         <div class="col-lg-6">
             <span class="badge bg-info text-white mb-2">INDIE / POP</span>
@@ -133,8 +133,7 @@ include 'templates/header.php';
                 minh bạch và quan trọng là hiệu quả viral cực tốt."
             </h3>
             <div class="d-flex justify-content-center align-items-center mt-4">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcygXl9-Yy2-gJg5-y-g5-y-g5-y-g5-y&s"
-                    alt="User" class="rounded-circle me-3 shadow-sm"
+                <img src="./assets/images/24kright.png" alt="User" class="rounded-circle me-3 shadow-sm"
                     style="width: 60px; height: 60px; object-fit: cover;">
                 <div class="text-start">
                     <h5 class="fw-bold mb-0 text-dark">24k.Right</h5>

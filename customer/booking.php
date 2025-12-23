@@ -1,12 +1,30 @@
 <?php
 // customer/booking.php
 session_start();
+require_once '../config/db.php'; // --- CODE MỚI: Cần connect DB để lấy rank ---
+require_once '../config/functions.php'; // --- CODE MỚI: Load hàm config ---
 
 // Kiểm tra giỏ hàng
 if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
     header("Location: ../services.php");
     exit;
 }
+
+// --- CODE MỚI: LẤY THÔNG TIN RANK CỦA USER ---
+$user_id = $_SESSION['user_id'] ?? 0;
+$user_rank = 'Level 1'; // Mặc định
+if($user_id > 0) {
+    $stmt = $conn->prepare("SELECT rank_level FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    if($row = $res->fetch_assoc()){
+        $user_rank = $row['rank_level'];
+    }
+    $stmt->close();
+}
+$rankConfig = getMembershipConfig()[$user_rank];
+// ---------------------------------------------
 
 // Chuyển đổi dữ liệu giỏ hàng để dùng trong JS
 $cart_items = array_values($_SESSION['cart']);
@@ -18,8 +36,21 @@ include '../templates/header.php';
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="display-6 fw-bold text-dark-blue">Thiết lập lịch đăng</h1>
-            <p class="text-muted">Vui lòng chọn đủ số slot cho tất cả các gói dịch vụ bên dưới.</p>
+            <h1 class="display-6 fw-bold text-dark-blue">
+                Thiết lập lịch đăng
+                <span class="badge bg-<?php echo $rankConfig['badge_color']; ?> fs-6 align-middle ms-2">
+                    <i class="bi <?php echo $rankConfig['icon']; ?>"></i> <?php echo $rankConfig['name']; ?>
+                </span>
+            </h1>
+
+            <?php if($rankConfig['discount_percent'] > 0): ?>
+            <p class="text-success fw-bold mb-1">
+                <i class="bi bi-gift-fill"></i> Bạn đang được giảm <?php echo $rankConfig['discount_percent']; ?>% trên
+                tổng đơn hàng!
+            </p>
+            <?php else: ?>
+            <p class="text-muted">Tích lũy thêm để nhận ưu đãi thành viên.</p>
+            <?php endif; ?>
         </div>
         <button class="btn btn-schedio-primary btn-lg px-5 shadow-sm" id="btn-pre-check">
             Hoàn tất & Điền thông tin <i class="bi bi-arrow-right ms-2"></i>
@@ -27,7 +58,6 @@ include '../templates/header.php';
     </div>
 
     <div class="row g-4">
-
         <div class="col-lg-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white fw-bold py-3 text-uppercase small text-muted border-bottom">
@@ -121,13 +151,11 @@ include '../templates/header.php';
 </div>
 
 <?php include '../templates/footer.php'; ?>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-
     // --- KHỞI TẠO DỮ LIỆU ---
     let cartData = <?php echo $json_cart; ?>;
     let bookings = {};
