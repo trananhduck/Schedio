@@ -122,6 +122,7 @@ CREATE TABLE `post` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) NOT NULL,
   `status` enum('pending','scheduled','posted','cancelled') DEFAULT 'pending',
+  `result_link` TEXT DEFAULT NULL COMMENT 'Link bài đăng thực tế',
   `created_at` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`)

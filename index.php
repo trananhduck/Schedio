@@ -16,7 +16,7 @@ include 'templates/header.php';
             <a href="./services.php" class="btn btn-warning btn-lg me-3 schedio-btn-yellow">Xem giá</a>
 
             <?php if (!isset($_SESSION['user_id'])): ?>
-            <a href="./register.php" class="btn btn-outline-dark btn-lg schedio-btn-outline">Đăng ký ngay</a>
+                <a href="./register.php" class="btn btn-outline-dark btn-lg schedio-btn-outline">Đăng ký ngay</a>
             <?php endif; ?>
         </div>
         <div class="col-md-6 text-center">
@@ -116,11 +116,11 @@ include 'templates/header.php';
         </div>
 
         <?php if (isset($_SESSION['user_id'])): ?>
-        <div class="text-center mt-5 pt-3">
-            <a href="./services.php" class="btn btn-schedio-primary btn-lg px-5 shadow-sm fw-bold rounded-pill">
-                Bắt đầu chiến dịch ngay <i class="bi bi-arrow-right ms-2"></i>
-            </a>
-        </div>
+            <div class="text-center mt-5 pt-3">
+                <a href="./services.php" class="btn btn-schedio-primary btn-lg px-5 shadow-sm fw-bold rounded-pill">
+                    Bắt đầu chiến dịch ngay <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
         <?php endif; ?>
 
     </div>
@@ -188,11 +188,112 @@ include 'templates/header.php';
     </div>
 </section>
 
-<?php if (!isset($_SESSION['user_id'])): ?>
-<section class="container my-5 py-5 text-center">
-    <h2 class="fw-bold mb-4 text-dark-blue">Bạn đã sẵn sàng tối ưu quy trình quản lý nội dung của mình chưa?</h2>
-    <a href="./register.php" class="btn btn-warning btn-lg schedio-btn-yellow">Đăng ký ngay</a>
+<section class="container my-5 pt-3 pb-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-dark-blue">Hạng thành viên & Ưu đãi độc quyền</h2>
+        <p class="text-muted">Hệ thống tự động tích lũy chi tiêu. Thăng hạng càng cao, ưu đãi càng lớn!</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm text-center py-4 position-relative overflow-hidden">
+                <div class="card-body">
+                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 80px; height: 80px;">
+                        <i class="bi bi-person text-secondary fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-secondary">Level 1</h5>
+                    <p class="small text-muted mb-3">Thành viên mới</p>
+                    <hr class="w-50 mx-auto opacity-25">
+                    <div class="text-start px-3">
+                        <p class="mb-1 small"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Chi tiêu:
+                            <strong>0đ</strong>
+                        </p>
+                        <p class="mb-0 small"><i class="bi bi-tag-fill text-secondary me-2"></i>Ưu đãi:
+                            <strong>0%</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow text-center py-4 position-relative overflow-hidden">
+                <div class="card-body">
+                    <div class="rounded-circle bg-dark text-white d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 80px; height: 80px;">
+                        <i class="bi bi-mic-fill fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Level 2</h5>
+                    <p class="small text-muted mb-3">Tích cực hoạt động</p>
+                    <hr class="w-50 mx-auto opacity-25">
+                    <div class="text-start px-3">
+                        <p class="mb-1 small"><i class="bi bi-check-circle-fill text-dark me-2"></i>Chi tiêu: <strong>>
+                                1 Triệu</strong></p>
+                        <p class="mb-0 small"><i class="bi bi-tag-fill text-warning me-2"></i>Giảm giá: <strong
+                                class="text-danger">5%</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-primary border-2 shadow-sm text-center py-4 position-relative overflow-hidden"
+                style="background: #f0f8ff;">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 80px; height: 80px;">
+                        <i class="bi bi-vinyl-fill fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-primary">Level 3</h5>
+                    <p class="small text-muted mb-3">Khách hàng thân thiết</p>
+                    <hr class="w-50 mx-auto opacity-25">
+                    <div class="text-start px-3">
+                        <p class="mb-1 small"><i class="bi bi-check-circle-fill text-primary me-2"></i>Chi tiêu:
+                            <strong>> 3 Triệu</strong>
+                        </p>
+                        <p class="mb-0 small"><i class="bi bi-tag-fill text-warning me-2"></i>Giảm giá: <strong
+                                class="text-danger">10%</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-warning border-2 shadow-lg text-center py-4 position-relative overflow-hidden"
+                style="background: #fffae6;">
+                <div class="position-absolute top-0 end-0 bg-danger text-white px-3 py-1 small fw-bold"
+                    style="border-bottom-left-radius: 10px;">VIP</div>
+                <div class="card-body">
+                    <div class="rounded-circle bg-warning text-dark d-inline-flex align-items-center justify-content-center mb-3"
+                        style="width: 80px; height: 80px; box-shadow: 0 0 15px rgba(253, 208, 59, 0.6);">
+                        <i class="bi bi-trophy-fill fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Level 4</h5>
+                    <p class="small text-muted mb-3">Đẳng cấp ngôi sao</p>
+                    <hr class="w-50 mx-auto opacity-25">
+                    <div class="text-start px-3">
+                        <p class="mb-1 small"><i class="bi bi-check-circle-fill text-dark me-2"></i>Chi tiêu: <strong>>
+                                10 Triệu</strong></p>
+                        <p class="mb-0 small"><i class="bi bi-tag-fill text-danger me-2"></i>Giảm giá: <strong
+                                class="text-danger fs-5">15%</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <p class="fst-italic text-muted small">* Mức giảm giá áp dụng tự động cho mọi đơn hàng khi bạn đạt đủ hạn mức
+            chi tiêu.</p>
+    </div>
 </section>
+
+<?php if (!isset($_SESSION['user_id'])): ?>
+    <section class="container my-5 py-5 text-center">
+        <h2 class="fw-bold mb-4 text-dark-blue">Bạn đã sẵn sàng tối ưu quy trình quản lý nội dung của mình chưa?</h2>
+        <a href="./register.php" class="btn btn-warning btn-lg schedio-btn-yellow">Đăng ký ngay</a>
+    </section>
 <?php endif; ?>
 
 <?php include 'templates/footer.php'; ?>

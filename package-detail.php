@@ -1,185 +1,201 @@
 <?php
 session_start();
 require_once 'config/db.php';
+include 'templates/header.php';
 
-// 2. Lấy SLUG gói từ URL
-$package_slug = isset($_GET['id']) ? $_GET['id'] : '';
-
-// 3. Lấy thông tin gói
-$stmt = $conn->prepare("SELECT * FROM package WHERE slug = ? AND active = 1");
-$stmt->bind_param("s", $package_slug);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    include 'templates/header.php';
-    echo '<div class="container my-5"><div class="alert alert-danger">Lỗi: Gói dịch vụ không tồn tại.</div></div>';
-    include 'templates/footer.php';
+// 1. Lấy slug từ URL
+if (!isset($_GET['slug'])) {
+    echo "<script>alert('Gói dịch vụ không tồn tại!'); window.location.href='services.php';</script>";
     exit;
 }
 
+$slug = $_GET['slug'];
+$is_logged_in = isset($_SESSION['user_id']);
+
+// 2. Lấy thông tin chi tiết gói
+$stmt = $conn->prepare("SELECT * FROM package WHERE slug = ? AND active = 1");
+$stmt->bind_param("s", $slug);
+$stmt->execute();
+$result = $stmt->get_result();
 $package = $result->fetch_assoc();
-$packageName = $package['name'];
-$package_db_id = $package['id'];
-$features = explode("\n", trim($package['description']));
-$stmt->close();
 
-// 5. Lấy dữ liệu Portfolio
-$portfolio = [];
-$stmt_p = $conn->prepare("SELECT * FROM portfolio WHERE package_id = ?");
-$stmt_p->bind_param("i", $package_db_id);
-$stmt_p->execute();
-$portfolio_result = $stmt_p->get_result();
-while ($row = $portfolio_result->fetch_assoc()) {
-    $portfolio[] = $row;
+if (!$package) {
+    echo "<script>alert('Không tìm thấy gói dịch vụ!'); window.location.href='services.php';</script>";
+    exit;
 }
-$stmt_p->close();
 
-include 'templates/header.php';
+// 3. Lấy giá của gói này trên các Platform khác nhau
+$prices = [];
+
+$sql_p = "SELECT so.price, pl.name, pl.id as platform_id 
+          FROM service_option so 
+          JOIN platform pl ON so.platform_id = pl.id 
+          WHERE so.package_id = " . $package['id'] . "
+          GROUP BY pl.id"; // 
+
+$res_p = $conn->query($sql_p);
+
+while ($row = $res_p->fetch_assoc()) {
+    $prices[] = $row;
+}
+
+// Xử lý mô tả thành danh sách
+$features = explode("\n", $package['description']);
 ?>
 
-<div class="container my-4">
-    <nav aria-label="breadcrumb">
+<div class="container my-5">
+    <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.php">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a href="services.php">Bảng giá</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($packageName); ?></li>
+            <li class="breadcrumb-item"><a href="index.php" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="services.php" class="text-decoration-none text-muted">Bảng giá</a></li>
+            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">
+                <?php echo htmlspecialchars($package['name']); ?></li>
         </ol>
     </nav>
-</div>
 
-<div class="container">
-    <h1 class="display-4 fw-bold mb-4 package-title"><?php echo htmlspecialchars($package['name']); ?></h1>
-</div>
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <h1 class="display-5 fw-bold text-primary mb-3"><?php echo htmlspecialchars($package['name']); ?></h1>
+            <p class="lead text-muted mb-4">Giải pháp truyền thông tối ưu dành cho nghệ sĩ Underground.</p>
 
-<div class="container">
-    <div class="overview-box p-4 p-md-5 rounded">
-        <div class="row align-items-center">
-            <div class="col-lg-7 mb-4 mb-lg-0">
-                <h3 class="fw-bold text-dark-blue">Tổng quan</h3>
-                <p class="text-muted"><?php echo htmlspecialchars($package['overview']); ?></p>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-star-fill text-warning me-2"></i>Quyền lợi gói dịch vụ</h4>
+                    <ul class="list-group list-group-flush">
+                        <?php foreach ($features as $feature): ?>
+                        <li class="list-group-item bg-transparent border-0 ps-0 d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                            <span class="fs-5"><?php echo htmlspecialchars($feature); ?></span>
+                        </li>
+                        <?php endforeach; ?>
+                        <li class="list-group-item bg-transparent border-0 ps-0 d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                            <span class="fs-5">Hỗ trợ tư vấn nội dung miễn phí</span>
+                        </li>
+                        <li class="list-group-item bg-transparent border-0 ps-0 d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                            <span class="fs-5">Báo cáo số liệu sau chiến dịch</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="col-lg-5">
-                <ul class="list-unstyled checklist">
-                    <?php foreach ($features as $feature): ?>
-                    <li>
-                        <i class="bi bi-check-lg text-primary"></i>
-                        <span><?php echo htmlspecialchars(ltrim(trim($feature), '- ')); ?></span>
-                    </li>
+
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                <div>
+                    <strong>Lưu ý:</strong> Gói dịch vụ này bao gồm <strong><?php echo $package['slot_count']; ?>
+                        slot</strong> (khung giờ đăng bài). Bạn sẽ được chọn lịch cụ thể ở bước tiếp theo.
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow rounded-4 bg-light">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4 text-center">Chọn kênh triển khai</h4>
+
+                    <?php foreach ($prices as $opt): ?>
+                    <?php
+                        // Logic kiểm tra giỏ hàng
+                        $key = $package['slug'] . '_' . md5($opt['name']);
+                        $isAdded = isset($_SESSION['cart'][$key]);
+                        $displayPrice = ($opt['price'] >= 1000) ? number_format($opt['price'] / 1000) . 'k' : $opt['price'];
+                        ?>
+
+                    <div class="card mb-3 border border-2 hover-shadow transition-all">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold mb-1"><?php echo htmlspecialchars($opt['name']); ?></h6>
+                                <span class="text-primary fw-bold fs-5"><?php echo $displayPrice; ?></span>
+                            </div>
+
+                            <?php if ($is_logged_in): ?>
+                            <button
+                                class="btn <?php echo $isAdded ? 'btn-secondary' : 'btn-warning'; ?> rounded-pill px-4 fw-bold btn-toggle-cart"
+                                data-added="<?php echo $isAdded ? 'true' : 'false'; ?>"
+                                onclick="toggleCart(this, '<?php echo $package['slug']; ?>', '<?php echo $package['name']; ?>', '<?php echo $opt['name']; ?>', '<?php echo $displayPrice; ?>', <?php echo $package['slot_count']; ?>)">
+                                <?php echo $isAdded ? 'Đã chọn' : '+ Chọn'; ?>
+                            </button>
+                            <?php else: ?>
+                            <a href="login.php" class="btn btn-outline-dark rounded-pill px-3 btn-sm">Đăng nhập</a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                     <?php endforeach; ?>
-                </ul>
+
+                    <div class="text-center mt-4">
+                        <small class="text-muted">Giá đã bao gồm thuế và phí dịch vụ.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="services.php" class="text-decoration-none fw-bold text-dark"><i class="bi bi-arrow-left"></i>
+                    Quay lại bảng giá</a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container my-5 py-4">
-    <h2 class="text-center fw-bold mb-5">Một số dự án đã thực hiện</h2>
-
-    <?php if (!empty($portfolio)): ?>
-    <div class="row g-4">
-        <?php foreach ($portfolio as $project): ?>
-        <div class="col-md-4">
-            <div class="card portfolio-card h-100">
-                <img src="<?php echo htmlspecialchars($project['image_url']); ?>" class="card-img-top"
-                    alt="<?php echo htmlspecialchars($project['title']); ?>" style="height: 200px; object-fit: cover;">
-
-                <div class="card-body">
-                    <h5 class="card-title fw-bold"><?php echo htmlspecialchars($project['title']); ?></h5>
-                    <p class="card-text text-muted small"><?php echo htmlspecialchars($project['description']); ?></p>
-                </div>
-
-                <div class="card-footer bg-transparent border-0 pb-3">
-                    <button type="button"
-                        class="btn <?php echo $project['type'] == 'pdf' ? 'btn-outline-dark' : 'btn-schedio-primary'; ?> w-100 btn-view-project"
-                        data-title="<?php echo htmlspecialchars($project['title']); ?>"
-                        data-desc="<?php echo htmlspecialchars($project['description']); ?>"
-                        data-img="<?php echo htmlspecialchars($project['image_url']); ?>"
-                        data-link="<?php echo htmlspecialchars($project['link_url']); ?>"
-                        data-type="<?php echo htmlspecialchars($project['type']); ?>">
-                        <?php echo $project['type'] == 'pdf' ? '<i class="bi bi-file-pdf"></i> Xem báo cáo' : '<i class="bi bi-eye"></i> Xem chi tiết'; ?>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <?php endforeach; ?>
-    </div>
-    <?php else: ?>
-    <div class="text-center text-muted py-5 bg-light rounded">
-        <i class="bi bi-folder2-open display-4 mb-3 d-block"></i>
-        <p>Chưa có dự án mẫu nào cho gói này.</p>
-    </div>
-    <?php endif; ?>
-</div>
-
-<div class="container my-5 text-center">
-    <a href="services.php" class="btn btn-outline-primary btn-lg px-5 rounded-pill">
-        <i class="bi bi-arrow-left me-2"></i> Quay lại Bảng giá
+<?php
+$cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
+if ($is_logged_in):
+?>
+<div id="floating-cart" class="<?php echo $cart_count > 0 ? '' : 'd-none'; ?>">
+    <a href="customer/booking.php" class="btn btn-schedio-primary shadow-lg py-3 px-4 rounded-pill">
+        <i class="bi bi-cart-check-fill me-2"></i>
+        Tiến hành đặt lịch (<span id="cart-count"><?php echo $cart_count; ?></span> gói)
     </a>
 </div>
+<?php endif; ?>
 
-<div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title fw-bold text-dark-blue" id="modalProjectTitle">Tiêu đề dự án</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center pt-0">
-                <div class="mb-4 bg-light rounded overflow-hidden">
-                    <img src="" id="modalProjectImg" class="img-fluid" alt="Project Image" style="max-height: 500px;">
-                </div>
-
-                <p id="modalProjectDesc" class="text-muted fst-italic mb-4"></p>
-
-                <a href="#" id="modalProjectLink" target="_blank"
-                    class="btn btn-primary px-5 py-2 rounded-pill shadow-sm">
-                    <i class="bi bi-box-arrow-up-right me-2"></i> Truy cập bài viết gốc / File PDF
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php include 'templates/footer.php'; ?>
-
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
-    const buttons = document.querySelectorAll('.btn-view-project');
+function toggleCart(btnElement, id, name, platform, price, slots) {
+    const isAdded = $(btnElement).data('added');
+    const action = isAdded ? 'remove' : 'add';
+    const originalText = btnElement.innerText;
 
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            // 1. Lấy dữ liệu từ data-attribute của nút bấm
-            const title = this.getAttribute('data-title');
-            const desc = this.getAttribute('data-desc');
-            const img = this.getAttribute('data-img');
-            const link = this.getAttribute('data-link');
-            const type = this.getAttribute('data-type');
+    // Hiệu ứng loading nhẹ
+    btnElement.innerText = '...';
+    btnElement.disabled = true;
 
-            // 2. Điền dữ liệu vào Modal
-            document.getElementById('modalProjectTitle').innerText = title;
-            document.getElementById('modalProjectDesc').innerText = desc;
-            document.getElementById('modalProjectImg').src = img;
+    $.ajax({
+        url: 'customer/cart_action.php', // Đảm bảo đường dẫn này đúng
+        type: 'POST',
+        data: {
+            action: action,
+            id: id,
+            name: name,
+            platform: platform,
+            price: price,
+            slots: slots
+        },
+        dataType: 'json',
+        success: function(res) {
+            $('#cart-count').text(res.count);
+            if (res.count > 0) $('#floating-cart').removeClass('d-none');
+            else $('#floating-cart').addClass('d-none');
 
-            const linkBtn = document.getElementById('modalProjectLink');
-            linkBtn.href = link;
-
-            // Đổi text nút dựa trên loại file
-            if (type === 'pdf') {
-                linkBtn.innerHTML =
-                    '<i class="bi bi-file-earmark-pdf-fill me-2"></i> Mở file PDF';
-                linkBtn.classList.remove('btn-primary');
-                linkBtn.classList.add('btn-danger');
+            btnElement.disabled = false;
+            if (action === 'add') {
+                $(btnElement).data('added', true);
+                btnElement.innerText = 'Đã chọn';
+                btnElement.classList.remove('btn-warning');
+                btnElement.classList.add('btn-secondary');
             } else {
-                linkBtn.innerHTML = '<i class="bi bi-facebook me-2"></i> Xem bài viết gốc';
-                linkBtn.classList.remove('btn-danger');
-                linkBtn.classList.add('btn-primary');
+                $(btnElement).data('added', false);
+                btnElement.innerText = '+ Chọn';
+                btnElement.classList.remove('btn-secondary');
+                btnElement.classList.add('btn-warning');
             }
-
-            // 3. Hiện Modal
-            projectModal.show();
-        });
+        },
+        error: function() {
+            btnElement.innerText = originalText;
+            btnElement.disabled = false;
+            alert('Lỗi kết nối server.');
+        }
     });
-});
+}
 </script>
+<?php include 'templates/footer.php'; ?>

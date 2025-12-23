@@ -123,7 +123,8 @@ function renderCartButton($slug, $name, $platform, $price, $slots)
                             </td>
 
                             <td class="text-center align-middle">
-                                <a href="#" class="btn btn-outline-dark btn-sm">Xem</a>
+                                <a href="package-detail.php?slug=<?php echo $pkg['slug']; ?>"
+                                    class="btn btn-outline-dark btn-sm">Xem chi tiết</a>
                             </td>
                         </tr>
                 <?php endwhile;

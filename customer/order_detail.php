@@ -1,23 +1,29 @@
 <?php
-session_start();
+// customer/order_detail.php
+
+// 1. KHỞI TẠO SESSION AN TOÀN
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once '../config/db.php';
 
-// 1. KIỂM TRA ĐĂNG NHẬP & QUYỀN CUSTOMER (Đã sửa)
+// 2. KIỂM TRA QUYỀN
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 'customer') {
-    // Redirect ra ngoài thư mục customer để về trang login gốc
-    header("Location: ../login.php"); 
+    header("Location: ../login.php");
     exit;
 }
 
 $user_id = $_SESSION['user_id'];
 
-// 2. KIỂM TRA ID ĐƠN HÀNG
+// 3. KIỂM TRA ID ĐƠN HÀNG
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     die("Không tìm thấy ID đơn hàng.");
 }
 $order_id = intval($_GET['id']);
 
-// 3. TRUY VẤN CHI TIẾT ĐƠN HÀNG (Bảo mật: Chỉ lấy đơn của user hiện tại)
+// 4. TRUY VẤN CHI TIẾT
+// Lưu ý: o.* sẽ lấy cả cột updated_at (thời gian cập nhật cuối cùng)
 $sql = "
     SELECT o.*, 
            p.name AS package_name, 
@@ -37,32 +43,30 @@ $result = $stmt->get_result();
 $order = $result->fetch_assoc();
 
 if (!$order) {
-    // Nếu không tìm thấy hoặc đơn này không phải của khách này
     echo "<script>alert('Đơn hàng không tồn tại hoặc bạn không có quyền xem!'); window.location.href='account.php?tab=orders';</script>";
     exit;
 }
 
-// 4. XỬ LÝ: KHÁCH HÀNG PHẢN HỒI (DUYỆT DEMO / YÊU CẦU SỬA)
+// 5. XỬ LÝ KHÁCH HÀNG PHẢN HỒI
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['customer_action'])) {
     $action = $_POST['customer_action'];
     
     if ($action == 'approve_demo') {
-        // Khách duyệt -> Chuyển sang chờ thanh toán
         $stmt = $conn->prepare("UPDATE orders SET status = 'waiting_payment' WHERE id = ?");
         $stmt->bind_param("i", $order_id);
         $stmt->execute();
-        echo "<script>alert('Đã xác nhận Demo! Vui lòng tiến hành thanh toán.'); window.location.reload();</script>";
+        header("Location: order_detail.php?id=$order_id");
+        exit;
     } 
     elseif ($action == 'request_fix') {
-        // Khách yêu cầu sửa -> Quay lại Pending (hoặc trạng thái design)
         $fix_note = trim($_POST['fix_note']);
-        // Lưu ý: Logic thực tế có thể cần thêm bảng log feedback, ở đây demo cập nhật vào note
-        $new_note = $order['note'] . "\n[Khách yêu cầu sửa " . date('d/m') . "]: " . $fix_note;
+        $new_note = $order['note'] . "\n[Khách yêu cầu sửa " . date('d/m H:i') . "]: " . $fix_note;
         
         $stmt = $conn->prepare("UPDATE orders SET status = 'pending', note = ? WHERE id = ?");
         $stmt->bind_param("si", $new_note, $order_id);
         $stmt->execute();
-        echo "<script>alert('Đã gửi yêu cầu chỉnh sửa cho Admin.'); window.location.reload();</script>";
+        header("Location: order_detail.php?id=$order_id");
+        exit;
     }
 }
 
@@ -78,8 +82,9 @@ include '../templates/header.php';
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <a href="account.php?tab=orders" class="text-decoration-none text-muted small"><i
-                    class="bi bi-arrow-left"></i> Quay lại danh sách</a>
+            <a href="account.php?tab=orders" class="text-decoration-none text-muted small">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
             <h2 class="text-dark-blue fw-bold mb-0 mt-1">Chi tiết đơn hàng #<?php echo $order_code; ?></h2>
         </div>
 
@@ -100,34 +105,90 @@ include '../templates/header.php';
 
     <div class="row g-4">
         <div class="col-lg-8">
+
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white fw-bold py-3">Thông tin dịch vụ</div>
                 <div class="card-body">
-                    <p><strong>Gói dịch vụ:</strong> <?php echo htmlspecialchars($order['package_name']); ?></p>
-                    <p><strong>Kênh truyền thông:</strong> <?php echo htmlspecialchars($order['platform_name']); ?></p>
-                    <p><strong>Giá tiền:</strong> <span
-                            class="fw-bold text-primary"><?php echo $formatted_price; ?></span></p>
-                    <p><strong>Lịch đăng (dự kiến):</strong>
-                        <span class="fw-bold text-danger"><?php echo $formatted_schedule; ?></span>
-                    </p>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Gói dịch vụ:</small>
+                            <div class="fw-bold"><?php echo htmlspecialchars($order['package_name']); ?></div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Kênh truyền thông:</small>
+                            <div class="fw-bold"><?php echo htmlspecialchars($order['platform_name']); ?></div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Giá tiền:</small>
+                            <div class="fw-bold text-primary"><?php echo $formatted_price; ?></div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Lịch đăng (dự kiến):</small>
+                            <div class="fw-bold text-danger"><?php echo $formatted_schedule; ?></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white fw-bold py-3">Nội dung yêu cầu</div>
                 <div class="card-body">
-                    <p><strong>Tiêu đề:</strong> <?php echo htmlspecialchars($order['title']); ?></p>
-                    <p><strong>Link Source (Drive):</strong> <a href="<?php echo $order['content_url']; ?>"
-                            target="_blank" class="text-break"><?php echo $order['content_url']; ?></a></p>
-                    <p><strong>Link Sản phẩm:</strong> <a href="<?php echo $order['product_link']; ?>" target="_blank"
-                            class="text-break"><?php echo $order['product_link']; ?></a></p>
-                    <p><strong>Ghi chú:</strong> <br>
-                        <?php echo !empty($order['note']) ? nl2br(htmlspecialchars($order['note'])) : '<span class="text-muted fst-italic">Không có</span>'; ?>
-                    </p>
+                    <div class="mb-3">
+                        <strong class="d-block mb-1">Tiêu đề:</strong>
+                        <span class="fs-5"><?php echo htmlspecialchars($order['title']); ?></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong class="d-block mb-2">Link Source (Tài nguyên):</strong>
+                            <a href="<?php echo $order['content_url']; ?>" target="_blank"
+                                class="btn btn-outline-success btn-sm px-3 rounded-pill">
+                                <i class="bi bi-google"></i> Mở Google Drive
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="d-block mb-2">Link Sản phẩm:</strong>
+                            <?php 
+                                // Logic tự động chọn icon và tên nút
+                                $prod_link = $order['product_link'];
+                                $icon_class = 'bi-link-45deg';
+                                $btn_text = 'Truy cập liên kết';
+                                $btn_color = 'btn-outline-primary';
+
+                                if (strpos($prod_link, 'youtube') !== false || strpos($prod_link, 'youtu.be') !== false) {
+                                    $icon_class = 'bi-youtube';
+                                    $btn_text = 'Xem trên YouTube';
+                                    $btn_color = 'btn-outline-danger';
+                                } elseif (strpos($prod_link, 'facebook') !== false || strpos($prod_link, 'fb.com') !== false) {
+                                    $icon_class = 'bi-facebook';
+                                    $btn_text = 'Xem trên Facebook';
+                                } elseif (strpos($prod_link, 'tiktok') !== false) {
+                                    $icon_class = 'bi-tiktok';
+                                    $btn_text = 'Xem trên TikTok';
+                                    $btn_color = 'btn-outline-dark';
+                                } elseif (strpos($prod_link, 'soundcloud') !== false) {
+                                    $icon_class = 'bi-soundwave';
+                                    $btn_text = 'Nghe trên SoundCloud';
+                                    $btn_color = 'btn-outline-warning text-dark';
+                                }
+                            ?>
+                            <a href="<?php echo $prod_link; ?>" target="_blank"
+                                class="btn <?php echo $btn_color; ?> btn-sm px-3 rounded-pill">
+                                <i class="bi <?php echo $icon_class; ?>"></i> <?php echo $btn_text; ?>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded border border-light">
+                        <strong class="d-block mb-1 text-muted small">Ghi chú:</strong>
+                        <div class="fst-italic">
+                            <?php echo !empty($order['note']) ? nl2br(htmlspecialchars($order['note'])) : 'Không có ghi chú thêm.'; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <?php if($order['status'] == 'design_review'): ?>
+            <?php if ($order['status'] == 'design_review'): ?>
             <div class="card border-0 shadow-sm mb-4 border-info">
                 <div class="card-header bg-info text-white fw-bold py-3">
                     <i class="bi bi-palette-fill me-2"></i> Duyệt thiết kế (Demo)
@@ -135,7 +196,7 @@ include '../templates/header.php';
                 <div class="card-body text-center">
                     <h5 class="fw-bold mb-3">Admin đã gửi bản demo cho bạn:</h5>
 
-                    <?php if(!empty($order['admin_feedback_files'])): ?>
+                    <?php if (!empty($order['admin_feedback_files'])): ?>
                     <div class="mb-3">
                         <img src="<?php echo $order['admin_feedback_files']; ?>"
                             class="img-fluid rounded shadow-sm border" style="max-height: 400px;">
@@ -144,13 +205,14 @@ include '../templates/header.php';
 
                     <p class="fst-italic text-muted">"<?php echo htmlspecialchars($order['admin_feedback_content']); ?>"
                     </p>
-
                     <hr>
+
                     <div class="d-flex justify-content-center gap-3 mt-4">
                         <button class="btn btn-outline-danger px-4" type="button" data-bs-toggle="collapse"
                             data-bs-target="#fixForm">
                             <i class="bi bi-pencil"></i> Yêu cầu sửa
                         </button>
+
                         <form method="POST">
                             <input type="hidden" name="customer_action" value="approve_demo">
                             <button type="submit" class="btn btn-success px-4"
@@ -173,30 +235,25 @@ include '../templates/header.php';
             </div>
             <?php endif; ?>
 
-            <?php if($order['status'] == 'completed'): ?>
+            <?php if ($order['status'] == 'completed'): ?>
             <div class="card border-0 shadow-sm mb-4 border-success">
                 <div class="card-header bg-success text-white fw-bold py-3">
-                    <i class="bi bi-star-fill me-2"></i> Kết quả nghiệm thu
+                    <i class="bi bi-check-circle-fill me-2"></i> Bài đăng đã hoàn tất
                 </div>
                 <div class="card-body text-center p-5">
-                    <h4 class="text-success fw-bold">Chiến dịch đã hoàn thành!</h4>
-                    <p>Bài viết của bạn đã được đăng tải thành công.</p>
-                    <a href="<?php echo htmlspecialchars($order['result_links']); ?>" target="_blank"
-                        class="btn btn-outline-success btn-lg mt-2">
-                        <i class="bi bi-facebook me-2"></i> Xem bài đăng kết quả
-                    </a>
+                    <h4 class="text-success fw-bold">Chiến dịch thành công!</h4>
+                    <p class="mb-2">Bài viết của bạn đã được đăng tải chính thức.</p>
 
-                    <?php if(isset($order['fb_likes'])): ?>
-                    <div class="row mt-4 pt-3 border-top">
-                        <div class="col-4"><strong><?php echo number_format($order['fb_likes']); ?></strong> <br><small
-                                class="text-muted">Likes</small></div>
-                        <div class="col-4"><strong><?php echo number_format($order['fb_comments']); ?></strong>
-                            <br><small class="text-muted">Comments</small>
-                        </div>
-                        <div class="col-4"><strong><?php echo number_format($order['fb_shares']); ?></strong> <br><small
-                                class="text-muted">Shares</small></div>
-                    </div>
+                    <?php if(!empty($order['updated_at'])): ?>
+                    <p class="text-muted small mb-4">
+                        <i class="bi bi-clock-history"></i> Thời gian đăng:
+                        <strong><?php echo date('H:i - d/m/Y', strtotime($order['updated_at'])); ?></strong>
+                    </p>
                     <?php endif; ?>
+                    <a href="<?php echo htmlspecialchars($order['result_links']); ?>" target="_blank"
+                        class="btn btn-outline-success btn-lg px-5 shadow-sm">
+                        <i class="bi bi-box-arrow-up-right me-2"></i> Xem bài viết gốc
+                    </a>
                 </div>
             </div>
             <?php endif; ?>
@@ -204,7 +261,7 @@ include '../templates/header.php';
         </div>
 
         <div class="col-lg-4">
-            <?php if($order['status'] == 'waiting_payment'): ?>
+            <?php if ($order['status'] == 'waiting_payment'): ?>
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary text-white fw-bold py-3 text-center">THANH TOÁN</div>
                 <div class="card-body text-center">
@@ -214,12 +271,10 @@ include '../templates/header.php';
                         $account_no = '0344377104';
                         $account_name = 'TRAN ANH DUC';
                         $amount = $order['price_at_purchase'];
-                        $memo = "SCD" . $order['id']; // Nội dung CK ngắn gọn
-                        // API VietQR
+                        $memo = "SCD" . $order['id'];
                         $qr_url = "https://img.vietqr.io/image/$bank_id-$account_no-compact2.png?amount=$amount&addInfo=$memo&accountName=".urlencode($account_name);
                     ?>
                     <img src="<?php echo $qr_url; ?>" class="img-fluid mb-3 border rounded" style="width: 200px;">
-
                     <h5 class="fw-bold text-primary"><?php echo $formatted_price; ?></h5>
                     <div class="alert alert-warning small text-start mt-3">
                         <i class="bi bi-info-circle"></i> <strong>Lưu ý:</strong>
@@ -234,8 +289,9 @@ include '../templates/header.php';
                 <div class="card-body">
                     <h6 class="fw-bold">Cần hỗ trợ?</h6>
                     <p class="small text-muted mb-3">Nếu có vấn đề gì về đơn hàng, vui lòng liên hệ hotline.</p>
-                    <a href="tel:084123456789" class="btn btn-light w-100 border fw-bold"><i
-                            class="bi bi-telephone-fill me-2"></i> 084 123 456 789</a>
+                    <a href="tel:084123456789" class="btn btn-light w-100 border fw-bold">
+                        <i class="bi bi-telephone-fill me-2"></i> 084 123 456 789
+                    </a>
                 </div>
             </div>
         </div>

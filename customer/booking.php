@@ -1,8 +1,8 @@
 <?php
 // customer/booking.php
 session_start();
-require_once '../config/db.php'; // --- CODE MỚI: Cần connect DB để lấy rank ---
-require_once '../config/functions.php'; // --- CODE MỚI: Load hàm config ---
+require_once '../config/db.php'; 
+require_once '../config/functions.php'; 
 
 // Kiểm tra giỏ hàng
 if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
@@ -10,7 +10,7 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
     exit;
 }
 
-// --- CODE MỚI: LẤY THÔNG TIN RANK CỦA USER ---
+// --- LẤY THÔNG TIN RANK CỦA USER ---
 $user_id = $_SESSION['user_id'] ?? 0;
 $user_rank = 'Level 1'; // Mặc định
 if($user_id > 0) {
@@ -69,7 +69,7 @@ include '../templates/header.php';
 
             <div class="alert alert-info mt-3 small border-0 bg-light-blue">
                 <i class="bi bi-info-circle-fill me-1"></i>
-                Click vào từng gói để chọn lịch tương ứng trên bảng bên phải.
+                Click vào từng gói để chọn lịch tương ứng trên bảng bên phải. Các ô màu đỏ là giờ đã có người đặt.
             </div>
         </div>
 
@@ -151,6 +151,7 @@ include '../templates/header.php';
 </div>
 
 <?php include '../templates/footer.php'; ?>
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
 
@@ -165,11 +166,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentIndex = 0;
     const calendarEl = document.getElementById('calendar');
-
-    // Khởi tạo Modal (Bootstrap đã load xong từ footer)
     const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
 
-    // --- HÀM RENDER DANH SÁCH GÓI ---
+    // --- RENDER SIDEBAR ---
     const renderPackageList = () => {
         const listEl = document.getElementById('package-list-group');
         listEl.innerHTML = '';
@@ -234,9 +233,9 @@ document.addEventListener('DOMContentLoaded', function() {
             "badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill";
     }
 
-    // --- HÀM XÓA GÓI KHỎI GIỎ ---
+    // --- XÓA GÓI ---
     window.removePackage = function(event, index) {
-        event.stopPropagation(); // Chặn click vào dòng
+        event.stopPropagation();
         const itemToRemove = cartData[index];
 
         if (!confirm(`Bạn có chắc chắn muốn xóa gói "${itemToRemove.name}" này không?`)) return;
@@ -250,27 +249,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 platform: itemToRemove.platform
             },
             success: function(res) {
-                // Cập nhật dữ liệu JS
                 cartData.splice(index, 1);
-
-                // Cập nhật mảng bookings (xóa slot của gói bị xóa và dồn index lại)
                 let newBookings = {};
                 let oldBookingsArr = Object.values(bookings);
                 oldBookingsArr.splice(index, 1);
-
                 oldBookingsArr.forEach((slots, i) => {
                     newBookings[i] = slots;
                 });
                 bookings = newBookings;
 
-                // Logic chuyển hướng sau khi xóa
                 if (cartData.length === 0) {
                     alert('Giỏ hàng trống. Quay về trang Bảng giá.');
                     window.location.href = '../services.php';
                 } else {
                     if (index === currentIndex) currentIndex = 0;
                     else if (index < currentIndex) currentIndex--;
-
                     renderPackageList();
                     calendar.refetchEvents();
                 }
@@ -292,66 +285,84 @@ document.addEventListener('DOMContentLoaded', function() {
         slotDuration: '00:30:00',
         allDaySlot: false,
         nowIndicator: true,
+        height: '650px',
 
-        height: '650px', // Chiều cao cố định để có thanh cuộn
-
-        // Load sự kiện
+        // 1. TẢI EVENT (SLOT BẬN + SLOT ĐANG CHỌN)
         events: function(fetchInfo, successCallback, failureCallback) {
             if (cartData.length === 0) {
                 successCallback([]);
                 return;
             }
 
-            const platform = cartData[currentIndex].platform;
+            const currentPkg = cartData[currentIndex];
+            const platformName = currentPkg.platform;
 
-            // 1. Lấy slot đỏ từ server
+            // Gọi API lấy slot bận từ DB
             $.ajax({
                 url: 'get_booked_slots.php',
                 data: {
-                    platform: platform
+                    platform: platformName
                 },
-                success: function(serverEvents) {
-                    // 2. Lấy slot xanh từ bộ nhớ JS
-                    const mySlots = (bookings[currentIndex] || []).map(isoDate => ({
-                        start: isoDate,
-                        end: new Date(new Date(isoDate).getTime() + 30 *
-                            60000).toISOString(),
-                        display: 'block',
-                        color: '#0d6efd',
-                        title: 'Đang chọn',
-                        classNames: ['my-selected-slot']
-                    }));
-                    successCallback(serverEvents.concat(mySlots));
+                dataType: 'json',
+                success: function(bookedSlots) {
+                    // Lấy slot đang chọn (màu xanh) từ JS local
+                    const mySelectedSlots = (bookings[currentIndex] || []).map(
+                        isoDate => ({
+                            start: isoDate,
+                            end: new Date(new Date(isoDate).getTime() + 30 *
+                                60000).toISOString(),
+                            display: 'block',
+                            color: '#0d6efd',
+                            title: 'Đang chọn',
+                            classNames: ['my-selected-slot']
+                        }));
+
+                    // Gộp 2 mảng lại
+                    const allEvents = bookedSlots.concat(mySelectedSlots);
+                    successCallback(allEvents);
                 },
                 error: function() {
+                    console.error('Lỗi tải dữ liệu lịch.');
                     failureCallback();
                 }
             });
         },
 
-        // Click chọn slot
+        // 2. XỬ LÝ CLICK CHỌN SLOT
         dateClick: function(info) {
             if (cartData.length === 0) return;
             const max = parseInt(cartData[currentIndex].slots_count);
 
+            // Check thời gian (Cách 12h)
             if (info.date < new Date(Date.now() + 12 * 3600 * 1000)) {
                 alert('Vui lòng chọn giờ cách hiện tại ít nhất 12 tiếng.');
                 return;
             }
 
-            // Check trùng
+            // --- QUAN TRỌNG: CHECK TRÙNG VỚI SLOT BẬN ---
             const allEvents = calendar.getEvents();
-            const slotEnd = new Date(info.date.getTime() + 30 * 60000);
+            const clickStart = info.date;
+            const clickEnd = new Date(clickStart.getTime() + 30 * 60000); // +30 phút
+
+            let isBusy = false;
             for (let ev of allEvents) {
-                if (info.date < ev.end && slotEnd > ev.start) {
-                    alert('Khung giờ này đã bận.');
-                    return;
+                // Chỉ check overlap với slot background (slot đã booked)
+                if (ev.display === 'background') {
+                    if (clickStart < ev.end && clickEnd > ev.start) {
+                        isBusy = true;
+                        break;
+                    }
                 }
             }
 
+            if (isBusy) {
+                alert('Khung giờ này đã có người đặt. Vui lòng chọn giờ khác.');
+                return;
+            }
+            // ------------------------------------------------
+
             // Check số lượng
             if (bookings[currentIndex].length >= max) {
-                // Tự động chuyển gói nếu gói này đã đủ
                 const nextIndex = cartData.findIndex((item, i) => (bookings[i] ? bookings[i]
                     .length : 0) < parseInt(item.slots_count));
                 if (nextIndex !== -1 && confirm(
@@ -364,13 +375,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            // Thêm vào mảng và reload lịch
             bookings[currentIndex].push(info.dateStr);
             calendar.refetchEvents();
             renderPackageList();
         },
 
-        // Click bỏ chọn
+        // 3. XỬ LÝ CLICK BỎ CHỌN
         eventClick: function(info) {
+            // Chỉ cho xóa slot "Đang chọn" (title match)
             if (info.event.title === 'Đang chọn') {
                 if (confirm('Bỏ chọn slot này?')) {
                     const clickTime = info.event.start.getTime();
@@ -389,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.switchPackage = function(index) {
         currentIndex = index;
         renderPackageList();
-        calendar.refetchEvents();
+        calendar.refetchEvents(); // Quan trọng: Load lại event cho platform mới
     };
 
     // --- NÚT PRE-CHECK ---
@@ -414,7 +427,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- SUBMIT FORM ---
     $('#multiBookingForm').on('submit', function(e) {
         e.preventDefault();
-
         const title = $('#contentTitle').val().trim();
         const drive = $('#driveLink').val().trim();
         const prod = $('#productLink').val().trim();
@@ -461,6 +473,5 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-
 });
 </script>

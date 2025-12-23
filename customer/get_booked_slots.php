@@ -1,6 +1,6 @@
 <?php
 // customer/get_booked_slots.php
-session_start(); // Bắt đầu session để lấy user_id
+session_start();
 require_once '../config/db.php';
 header('Content-Type: application/json');
 
@@ -12,7 +12,7 @@ if (empty($platform_name)) {
     exit;
 }
 
-// 1. Lấy ID platform
+// 1. Get Platform ID from name
 $stmt = $conn->prepare("SELECT id FROM platform WHERE name = ?");
 $stmt->bind_param("s", $platform_name);
 $stmt->execute();
@@ -27,10 +27,11 @@ $row = $res->fetch_assoc();
 $platform_id = $row['id'];
 $stmt->close();
 
-// 2. Lấy các slot ĐÃ ĐẶT kèm thông tin người đặt
-// JOIN bảng schedules -> post -> orders để lấy user_id
+// 2. Fetch booked slots
+// We join schedules -> post -> orders to optionally get user info (to distinguish my slots vs others)
+// Filter by platform_id and exclude cancelled schedules.
 $query = "
-    SELECT s.start_time, s.end_time, o.user_id 
+    SELECT s.start_time, s.end_time, o.user_id
     FROM schedules s
     JOIN post p ON s.post_id = p.id
     JOIN orders o ON p.order_id = o.id
@@ -47,15 +48,13 @@ while ($row = $result->fetch_assoc()) {
     $is_my_slot = ($row['user_id'] == $current_user_id);
 
     $events[] = [
-        'id' => 'booked_slot',
+        'id' => 'booked_slot_' . $row['start_time'], // Unique ID helps with rendering
         'start' => $row['start_time'],
         'end' => $row['end_time'],
-        'display' => 'background',
-        // Nếu là slot của mình -> Màu xanh đậm (hoặc màu khác bạn thích)
-        // Nếu là của người khác -> Màu đỏ
-        'color' => $is_my_slot ? '#198754' : '#dc3545',
+        'display' => 'background', // Critical: Renders as a background color, not a block event
+        'color' => $is_my_slot ? '#198754' : '#dc3545', // Green for mine, Red for others
         'title' => $is_my_slot ? 'Bạn đã đặt' : 'Đã bận',
-        // Thêm class để CSS tùy chỉnh nếu cần
+        'overlap' => false, // Critical: Prevents other events from being dragged/resized over this
         'classNames' => $is_my_slot ? ['my-booked-slot'] : ['other-booked-slot']
     ];
 }
