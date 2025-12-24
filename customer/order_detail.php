@@ -22,8 +22,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 }
 $order_id = intval($_GET['id']);
 
-// 4. TRUY VẤN CHI TIẾT
-// Lưu ý: o.* sẽ lấy cả cột updated_at (thời gian cập nhật cuối cùng)
+// 4. TRUY VẤN CHI TIẾT ĐƠN HÀNG
 $sql = "
     SELECT o.*, 
            p.name AS package_name, 
@@ -47,6 +46,22 @@ if (!$order) {
     exit;
 }
 
+// --- MỚI: LẤY DANH SÁCH CÁC BÀI ĐĂNG (SLOTS) ---
+$sql_posts = "SELECT p.id, p.status, p.result_link, s.start_time 
+              FROM post p 
+              JOIN schedules s ON s.post_id = p.id 
+              WHERE p.order_id = ? 
+              ORDER BY s.start_time ASC";
+$stmt_p = $conn->prepare($sql_posts);
+$stmt_p->bind_param("i", $order_id);
+$stmt_p->execute();
+$posts_result = $stmt_p->get_result();
+$posts = [];
+while($row = $posts_result->fetch_assoc()) {
+    $posts[] = $row;
+}
+// ------------------------------------------------
+
 // 5. XỬ LÝ KHÁCH HÀNG PHẢN HỒI
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['customer_action'])) {
     $action = $_POST['customer_action'];
@@ -60,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['customer_action'])) {
     } 
     elseif ($action == 'request_fix') {
         $fix_note = trim($_POST['fix_note']);
-        $new_note = $order['note'] . "\n[Khách yêu cầu sửa " . date('d/m H:i') . "]: " . $fix_note;
+        $new_note = $order['note'] . "\n[Yêu cầu sửa " . date('d/m H:i') . "]: " . $fix_note;
         
         $stmt = $conn->prepare("UPDATE orders SET status = 'pending', note = ? WHERE id = ?");
         $stmt->bind_param("si", $new_note, $order_id);
@@ -149,7 +164,6 @@ include '../templates/header.php';
                         <div class="col-md-6">
                             <strong class="d-block mb-2">Link Sản phẩm:</strong>
                             <?php 
-                                // Logic tự động chọn icon và tên nút
                                 $prod_link = $order['product_link'];
                                 $icon_class = 'bi-link-45deg';
                                 $btn_text = 'Truy cập liên kết';
@@ -198,8 +212,15 @@ include '../templates/header.php';
 
                     <?php if (!empty($order['admin_feedback_files'])): ?>
                     <div class="mb-3">
+                        <?php if (filter_var($order['admin_feedback_files'], FILTER_VALIDATE_URL) && strpos($order['admin_feedback_files'], 'drive.google') !== false): ?>
+                        <a href="<?php echo $order['admin_feedback_files']; ?>" target="_blank"
+                            class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-google"></i> Xem Demo trên Drive
+                        </a>
+                        <?php else: ?>
                         <img src="<?php echo $order['admin_feedback_files']; ?>"
                             class="img-fluid rounded shadow-sm border" style="max-height: 400px;">
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
 
@@ -235,25 +256,55 @@ include '../templates/header.php';
             </div>
             <?php endif; ?>
 
-            <?php if ($order['status'] == 'completed'): ?>
+            <?php if ($order['status'] == 'paid' || $order['status'] == 'in_progress' || $order['status'] == 'completed'): ?>
             <div class="card border-0 shadow-sm mb-4 border-success">
                 <div class="card-header bg-success text-white fw-bold py-3">
-                    <i class="bi bi-check-circle-fill me-2"></i> Bài đăng đã hoàn tất
+                    <i class="bi bi-check-circle-fill me-2"></i> Tiến độ & Kết quả đăng bài
                 </div>
-                <div class="card-body text-center p-5">
-                    <h4 class="text-success fw-bold">Chiến dịch thành công!</h4>
-                    <p class="mb-2">Bài viết của bạn đã được đăng tải chính thức.</p>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Thời gian đăng</th>
+                                    <th>Trạng thái</th>
+                                    <th>Kết quả</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($posts as $post): ?>
+                                <tr>
+                                    <td class="fw-bold text-dark-blue">
+                                        <?php echo date('H:i d/m/Y', strtotime($post['start_time'])); ?>
+                                    </td>
+                                    <td>
+                                        <?php if($post['status'] == 'posted'): ?>
+                                        <span class="badge bg-success">Đã đăng</span>
+                                        <?php else: ?>
+                                        <span class="badge bg-warning text-dark">Chờ đăng</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if($post['status'] == 'posted' && !empty($post['result_link'])): ?>
+                                        <a href="<?php echo htmlspecialchars($post['result_link']); ?>" target="_blank"
+                                            class="btn btn-sm btn-outline-success rounded-pill">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i> Xem bài viết
+                                        </a>
+                                        <?php else: ?>
+                                        <span class="text-muted small fst-italic">-- Chưa có --</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <?php if(!empty($order['updated_at'])): ?>
-                    <p class="text-muted small mb-4">
-                        <i class="bi bi-clock-history"></i> Thời gian đăng:
-                        <strong><?php echo date('H:i - d/m/Y', strtotime($order['updated_at'])); ?></strong>
-                    </p>
+                    <?php if ($order['status'] == 'completed'): ?>
+                    <div class="alert alert-success mt-3 text-center border-0 bg-success-subtle">
+                        <strong><i class="bi bi-check-all"></i> Tất cả bài đăng đã hoàn tất!</strong>
+                    </div>
                     <?php endif; ?>
-                    <a href="<?php echo htmlspecialchars($order['result_links']); ?>" target="_blank"
-                        class="btn btn-outline-success btn-lg px-5 shadow-sm">
-                        <i class="bi bi-box-arrow-up-right me-2"></i> Xem bài viết gốc
-                    </a>
                 </div>
             </div>
             <?php endif; ?>

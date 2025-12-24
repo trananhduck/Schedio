@@ -14,13 +14,12 @@ if (!isset($conn)) {
 }
 
 $current_page = basename($_SERVER['SCRIPT_NAME']);
-$base_url = '/Schedio'; // Đảm bảo đường dẫn này đúng với thư mục dự án của bạn
+$base_url = '/Schedio';
 
 // --- LOGIC LẤY THÔNG BÁO MỚI NHẤT (TOAST) ---
 $toast_notif = null;
 if (isset($_SESSION['user_id']) && isset($conn)) {
     $uid = $_SESSION['user_id'];
-    // Lấy 1 thông báo chưa đọc mới nhất
     $sql_toast = "SELECT * FROM notifications WHERE user_id = $uid AND is_read = 0 ORDER BY created_at DESC LIMIT 1";
     $res_toast = $conn->query($sql_toast);
     if ($res_toast && $res_toast->num_rows > 0) {
@@ -161,7 +160,7 @@ if (isset($_SESSION['user_id']) && isset($conn)) {
         $btn_close_class = ($toast_notif['type'] == 'warning') ? '' : 'btn-close-white';
         ?>
 
-        <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 10000;">
+        <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 10001;">
             <div id="latestToast" class="toast show border-0 shadow-lg" role="alert" aria-live="assertive"
                 aria-atomic="true" data-bs-autohide="false">
                 <div class="toast-header <?php echo "$bg_header $text_header"; ?>">
@@ -191,14 +190,14 @@ if (isset($_SESSION['user_id']) && isset($conn)) {
 
         <script>
             function closeToast(notifId) {
-                // 1. Ẩn Toast ngay lập tức để người dùng thấy phản hồi nhanh
+                // 1. Ẩn Toast ngay lập tức
                 var toastEl = document.getElementById('latestToast');
                 if (toastEl) {
                     toastEl.classList.remove('show');
-                    toastEl.classList.add('hide'); // Bootstrap 5 class
+                    toastEl.classList.add('hide');
                 }
 
-                // 2. Gửi AJAX (Fetch) để cập nhật Database
+                // 2. Gửi AJAX đánh dấu đã đọc
                 var formData = new FormData();
                 formData.append('id', notifId);
 
