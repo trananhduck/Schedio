@@ -1,14 +1,15 @@
 <?php
 /*
  * config/db.php
- * File kết nối cơ sở dữ liệu MySQL
+ * File kết nối cơ sở dữ liệu MySQL (Đã cấu hình cho Docker)
  */
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-// Cấu hình thông tin kết nối (Mặc định của XAMPP)
-define('DB_SERVER', 'localhost');
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', '');
-define('DB_NAME', 'booking');
+
+// Cấu hình thông tin kết nối Docker
+define('DB_SERVER', 'db');   
+define('DB_USERNAME', 'root');   
+define('DB_PASSWORD', '123');   
+define('DB_NAME', 'booking');  
 
 // Tạo kết nối
 $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);

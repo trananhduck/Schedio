@@ -14,7 +14,7 @@ if (!isset($conn)) {
 }
 
 $current_page = basename($_SERVER['SCRIPT_NAME']);
-$base_url = '/Schedio';
+$base_url = '';
 
 // --- LOGIC LẤY THÔNG BÁO MỚI NHẤT (TOAST) ---
 $toast_notif = null;
