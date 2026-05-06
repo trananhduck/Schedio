@@ -1,24 +1,15 @@
 <?php
-/*
- * config/db.php
- * File kết nối cơ sở dữ liệu MySQL (Đã cấu hình cho Docker)
- */
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
-// Cấu hình thông tin kết nối Docker
-define('DB_SERVER', 'db');   
-define('DB_USERNAME', 'root');   
-define('DB_PASSWORD', '123');   
-define('DB_NAME', 'booking');  
+// Ưu tiên lấy thông số từ Vercel, nếu không có thì dùng mặc định của Docker
+define('DB_SERVER',   getenv('DB_SERVER')   ?: 'db');
+define('DB_USERNAME', getenv('DB_USERNAME') ?: 'root');
+define('DB_PASSWORD', getenv('DB_PASSWORD') ?: '123');
+define('DB_NAME',     getenv('DB_NAME')     ?: 'booking');
 
-// Tạo kết nối
 $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
-// Kiểm tra kết nối
 if ($conn->connect_error) {
-    // Nếu lỗi thì dừng chương trình và báo lỗi
     die("Kết nối thất bại: " . $conn->connect_error);
 }
-
-// Thiết lập bảng mã UTF-8 để hiển thị tiếng Việt không bị lỗi font
 $conn->set_charset("utf8mb4");
